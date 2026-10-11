@@ -1,0 +1,24 @@
+{
+  "name": "ae-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server that lets Claude drive Adobe After Effects through the Claude Bridge panel",
+  "type": "module",
+  "bin": {
+    "ae-mcp": "src/index.js"
+  },
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "acorn": "^8.19.0"
+  }
+}

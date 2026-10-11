@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Claude Bridge</title>
+  <style>
+    body { margin: 0; padding: 10px; font: 12px -apple-system, "Helvetica Neue", sans-serif; background: #232323; color: #d6d6d6; }
+    .row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #777; }
+    .dot.on { background: #4caf50; }
+    .dot.err { background: #e05252; }
+    #log { height: calc(100vh - 70px); overflow-y: auto; font: 11px Menlo, monospace; color: #9a9a9a; white-space: pre-wrap; }
+    #log .err { color: #e07a7a; }
+    small { color: #8a8a8a; }
+  </style>
+</head>
+<body>
+  <div class="row"><span id="dot" class="dot"></span><strong id="status">Starting…</strong></div>
+  <div class="row"><small id="detail"></small></div>
+  <div id="log"></div>
+  <script src="js/main.js"></script>
+</body>
+</html>
