@@ -6,13 +6,21 @@
  * the JSON result is returned. The port and a per-launch token are written to
  * a config file the MCP server reads, so nothing needs to be configured by hand.
  */
+(function () {
 'use strict';
 
-var http = require('http');
-var fs = require('fs');
-var os = require('os');
-var path = require('path');
-var crypto = require('crypto');
+// CEP exposes Node through window.cep_node (separate-context mode); plain Node
+// (tests) has the usual globals.
+var cepNode = typeof window !== 'undefined' ? window.cep_node : undefined;
+var nodeRequire = cepNode ? cepNode.require : require;
+var nodeProcess = cepNode ? cepNode.process : process;
+var NodeBuffer = cepNode ? cepNode.Buffer : Buffer;
+
+var http = nodeRequire('http');
+var fs = nodeRequire('fs');
+var os = nodeRequire('os');
+var path = nodeRequire('path');
+var crypto = nodeRequire('crypto');
 
 var DEFAULT_PORT = 8642;
 var PORT_ATTEMPTS = 20;
@@ -20,7 +28,7 @@ var EVAL_TIMEOUT_MS = 120000;
 var MAX_BODY = 20 * 1024 * 1024;
 
 function defaultConfigPath() {
-  var base = process.platform === 'darwin'
+  var base = nodeProcess.platform === 'darwin'
     ? path.join(os.homedir(), 'Library', 'Application Support', 'ae-mcp')
     : path.join(os.homedir(), '.ae-mcp');
   return path.join(base, 'bridge.json');
@@ -95,14 +103,14 @@ function createBridge(opts) {
 
   function send(res, status, body) {
     var data = JSON.stringify(body);
-    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(data) });
+    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': NodeBuffer.byteLength(data) });
     res.end(data);
   }
 
   function authorized(req) {
     var h = req.headers.authorization || '';
-    var given = Buffer.from(h.replace(/^Bearer /, ''));
-    var want = Buffer.from(token);
+    var given = NodeBuffer.from(h.replace(/^Bearer /, ''));
+    var want = NodeBuffer.from(token);
     return given.length === want.length && crypto.timingSafeEqual(given, want);
   }
 
@@ -121,7 +129,7 @@ function createBridge(opts) {
     });
     req.on('end', function () {
       var body;
-      try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch (e) {
+      try { body = JSON.parse(NodeBuffer.concat(chunks).toString('utf8')); } catch (e) {
         return send(res, 400, { ok: false, error: 'Invalid JSON' });
       }
       var started = Date.now();
@@ -137,7 +145,7 @@ function createBridge(opts) {
 
   function writeConfig() {
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
-    var data = JSON.stringify({ port: port, token: token, pid: process.pid, startedAt: new Date().toISOString() }, null, 2);
+    var data = JSON.stringify({ port: port, token: token, pid: nodeProcess.pid, startedAt: new Date().toISOString() }, null, 2);
     fs.writeFileSync(configPath, data, { mode: 384 }); // 0600
   }
 
@@ -178,7 +186,7 @@ function createBridge(opts) {
 
 function cepExtensionPath(cep) {
   var p = decodeURI(cep.getSystemPath('extension'));
-  return p.replace(/^file:\/\/\/?/, process.platform === 'win32' ? '' : '/');
+  return p.replace(/^file:\/\/\/?/, nodeProcess.platform === 'win32' ? '' : '/');
 }
 
 function startPanel() {
@@ -215,7 +223,14 @@ function startPanel() {
 }
 
 if (typeof window !== 'undefined' && window.__adobe_cep__) {
-  startPanel();
+  try {
+    startPanel();
+  } catch (e) {
+    document.getElementById('dot').className = 'dot err';
+    document.getElementById('status').textContent = '시작 실패';
+    document.getElementById('detail').textContent = String(e && e.stack || e);
+  }
 } else if (typeof module !== 'undefined') {
   module.exports = { createBridge: createBridge, defaultConfigPath: defaultConfigPath };
 }
+})();

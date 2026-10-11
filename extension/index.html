@@ -18,6 +18,14 @@
   <div class="row"><span id="dot" class="dot"></span><strong id="status">Starting…</strong></div>
   <div class="row"><small id="detail"></small></div>
   <div id="log"></div>
+  <script>
+    // Show load-time failures in the panel instead of leaving a grey dot.
+    window.onerror = function (msg, src, line) {
+      document.getElementById('dot').className = 'dot err';
+      document.getElementById('status').textContent = '시작 실패';
+      document.getElementById('detail').textContent = msg + (line ? ' (main.js:' + line + ')' : '');
+    };
+  </script>
   <script src="js/main.js"></script>
 </body>
 </html>
