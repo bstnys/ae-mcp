@@ -9,14 +9,17 @@
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #777; }
     .dot.on { background: #4caf50; }
     .dot.err { background: #e05252; }
-    #log { height: calc(100vh - 70px); overflow-y: auto; font: 11px Menlo, monospace; color: #9a9a9a; white-space: pre-wrap; }
+    #log { height: calc(100vh - 100px); overflow-y: auto; font: 11px Menlo, monospace; color: #9a9a9a; white-space: pre-wrap; }
     #log .err { color: #e07a7a; }
     small { color: #8a8a8a; }
+    button { background: #333; color: #ddd; border: 1px solid #444; border-radius: 5px; padding: 3px 10px; font: inherit; cursor: pointer; }
+    button:hover { background: #3c3c3c; }
   </style>
 </head>
 <body>
   <div class="row"><span id="dot" class="dot"></span><strong id="status">Starting…</strong></div>
   <div class="row"><small id="detail"></small></div>
+  <div class="row"><button id="openConsole" type="button">콘솔 열기</button><small id="consoleKeys"></small></div>
   <div id="log"></div>
   <script>
     // Show load-time failures in the panel instead of leaving a grey dot.
@@ -26,6 +29,7 @@
       document.getElementById('detail').textContent = msg + (line ? ' (main.js:' + line + ')' : '');
     };
   </script>
+  <script src="js/shortcut.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

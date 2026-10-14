@@ -1,7 +1,8 @@
 /*
- * Claude Console window: a floating command box inside After Effects.
- * Enter sends, Shift+Enter adds a line, Esc closes, ↑/↓ recalls earlier prompts,
- * ⌘N starts a new conversation.
+ * Claude Console window: a floating, FX Console-style command box inside
+ * After Effects. Enter sends, Shift+Enter adds a line, Esc stops a running
+ * request or closes the window, ↑/↓ recalls earlier prompts, ⌘N starts a new
+ * conversation. The footer button records the shortcut that opens it.
  */
 (function () {
 'use strict';
@@ -17,7 +18,8 @@ var MAX_ENTRIES = 200;
 var MAX_HISTORY = 50;
 
 var $ = function (id) { return document.getElementById(id); };
-var logEl = $('log'), input = $('input'), sendBtn = $('send'), statusEl = $('status');
+var logEl = $('log'), input = $('input'), statusEl = $('status');
+var Shortcut = window.ConsoleShortcut;
 
 var state = load();
 var current = null;          // running Claude process
@@ -96,8 +98,7 @@ function renderAll() {
 
 function setBusy(busy) {
   document.body.classList.toggle('busy', busy);
-  sendBtn.textContent = busy ? '중지' : '보내기';
-  sendBtn.classList.toggle('stop', busy);
+  input.placeholder = busy ? '작업 중… (Esc로 중지)' : 'After Effects에서 할 일을 입력하세요';
 }
 
 // ---------------------------------------------------------------- running
@@ -211,9 +212,72 @@ input.addEventListener('keydown', function (e) {
   }
 });
 
-window.addEventListener('focus', function () { input.focus(); });
+// ---------------------------------------------------------------- shortcut
+
+var bid = null, pending = null;
+
+function showShortcut() {
+  var ns = null;
+  try { bid = bid || Shortcut.bundleId(); ns = Shortcut.read(bid); } catch (e) {}
+  $('keysLabel').textContent = ns ? Shortcut.toDisplay(ns) : '없음';
+}
+
+function openRecorder() {
+  pending = null;
+  $('recorder').textContent = '…';
+  $('recorderNote').textContent = '';
+  $('save').disabled = true;
+  $('shortcut').classList.add('open');
+  $('recorder').focus();
+}
+
+function closeRecorder() {
+  $('shortcut').classList.remove('open');
+  input.focus();
+}
+
+function applied(msg) {
+  closeRecorder();
+  showShortcut();
+  add({ kind: 'assistant', text: msg });
+}
+
+$('keys').addEventListener('click', openRecorder);
+$('cancel').addEventListener('click', closeRecorder);
+$('recorder').addEventListener('keydown', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.key === 'Escape' && !e.metaKey && !e.ctrlKey && !e.altKey) { closeRecorder(); return; }
+  var r = Shortcut.fromKeyEvent(e);
+  if (!r) return;
+  if (r.error) { $('recorderNote').textContent = r.error; return; }
+  pending = r;
+  $('recorder').textContent = r.display;
+  $('recorderNote').textContent = '';
+  $('save').disabled = false;
+});
+$('save').addEventListener('click', function () {
+  if (!pending) return;
+  try {
+    Shortcut.write(pending.ns, bid || Shortcut.bundleId());
+    applied('콘솔 단축키를 ' + pending.display + '로 저장했어요. After Effects를 다시 시작하면 적용돼요.');
+  } catch (e) {
+    $('recorderNote').textContent = '저장하지 못했어요: ' + e.message;
+  }
+});
+$('clear').addEventListener('click', function () {
+  try {
+    Shortcut.remove(bid || Shortcut.bundleId());
+    applied('콘솔 단축키를 지웠어요. After Effects를 다시 시작하면 적용돼요.');
+  } catch (e) {
+    $('recorderNote').textContent = '지우지 못했어요: ' + e.message;
+  }
+});
+
+window.addEventListener('focus', function () { if (!$('shortcut').classList.contains('open')) input.focus(); });
 window.addEventListener('unload', function () { if (current) current.stop(); });
 
 renderAll();
+showShortcut();
 input.focus();
 })();

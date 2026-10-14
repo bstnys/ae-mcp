@@ -45,11 +45,13 @@ claude mcp add after-effects -- "$(command -v node)" ~/ae-mcp/server/src/index.j
 
 ## Claude Console (AE 안에서 바로 입력)
 
-FX Console처럼 단축키로 입력창 패널을 열고, 할 일을 적으면 Claude가 바로 AE를 조작합니다. 패널 탭을 끌어내 떠 있는 창으로 두면 FX Console처럼 쓸 수 있습니다.
+FX Console처럼 단축키를 누르면 떠 있는 입력창이 열리고, 할 일을 적으면 Claude가 바로 AE를 조작합니다.
 
-- **열기:** `Ctrl+Option+C` (또는 Window > Extensions > Claude Console)
+- **열기:** 기본 `Ctrl+Option+C`. Window > Extensions > Claude Console이나 Claude Bridge 패널의 "콘솔 열기" 버튼으로도 열 수 있어요.
 - **Enter** 보내기 · **Shift+Enter** 줄바꿈 · **Esc** 닫기(작업 중이면 중지) · **↑/↓** 이전 입력 · **⌘N** 새 대화
 - 창을 닫았다 열어도 대화가 이어집니다. 새로 시작하려면 "새 대화"를 누르세요.
+
+**단축키 바꾸기:** 콘솔 아래쪽의 "단축키" 버튼을 누르고 원하는 키 조합을 누른 뒤 저장하세요. ⌘, ⌃, ⌥ 중 하나 이상이 들어가야 하고, After Effects를 다시 시작하면 적용됩니다. macOS 앱 단축키로 등록되므로 시스템 설정 > 키보드 > 키보드 단축키 > 앱 단축키에서도 확인할 수 있어요.
 
 **동작 방식:** 콘솔이 맥에 설치된 Claude Code를 `claude -p`로 실행하고, 이 저장소의 MCP 서버만 연결해 AE 도구만 쓰도록 허용합니다. 본인 Claude 계정 로그인을 그대로 쓰므로 API 키가 필요 없습니다. 처음 한 번만 설치하고 로그인하세요.
 
@@ -58,7 +60,7 @@ curl -fsSL https://claude.ai/install.sh | bash
 claude   # 처음 실행 시 로그인
 ```
 
-**단축키 바꾸기:** `./scripts/set-console-shortcut.sh '@$k'` (`^` Ctrl, `~` Option, `$` Shift, `@` Cmd) 후 AE 재시작. macOS의 앱 단축키 기능을 쓰므로 시스템 설정 > 키보드 > 키보드 단축키 > 앱 단축키에서도 바꿀 수 있습니다.
+터미널에서 바꾸려면 `./scripts/set-console-shortcut.sh '@$k'` (`^` Ctrl, `~` Option, `$` Shift, `@` Cmd).
 
 **선택 설정:** `~/Library/Application Support/ae-mcp/console.json`에 `{"model": "sonnet"}`처럼 모델을, `claudePath`/`nodePath`로 실행 파일 경로를 지정할 수 있습니다.
 

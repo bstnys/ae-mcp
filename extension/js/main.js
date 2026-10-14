@@ -219,6 +219,14 @@ function startPanel() {
     }
   });
   bridge.start().catch(function (e) { log({ level: 'error', msg: e.message }); });
+
+  $('openConsole').addEventListener('click', function () {
+    cep.requestOpenExtension('com.aemcp.bridge.console', '');
+  });
+  try {
+    var ns = window.ConsoleShortcut.read();
+    $('consoleKeys').textContent = ns ? '단축키 ' + window.ConsoleShortcut.toDisplay(ns) : '단축키는 콘솔 아래쪽에서 정할 수 있어요';
+  } catch (e) {}
   window.addEventListener('unload', function () { bridge.stop(); });
 }
 
