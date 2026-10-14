@@ -11,13 +11,14 @@ KEYS="${1:-^~c}"
 found=0
 for app in /Applications/Adobe\ After\ Effects*/Adobe\ After\ Effects*.app; do
   [ -d "$app" ] || continue
+  case "$app" in *"Render Engine"*) continue ;; esac
   bid="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")"
   if [ "$KEYS" = "--remove" ]; then
     defaults delete "$bid" NSUserKeyEquivalents 2>/dev/null || true
   else
     defaults write "$bid" NSUserKeyEquivalents -dict-add "Claude Console" "$KEYS"
   fi
-  echo "  $(basename "$app") ($bid)"
+  echo "  $(basename "$app") ($bid): $(defaults read "$bid" NSUserKeyEquivalents 2>/dev/null | tr -s ' \n' ' ')"
   found=1
 done
 
