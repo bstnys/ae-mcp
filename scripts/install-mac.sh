@@ -19,7 +19,7 @@ done
 echo "3/4  Installing MCP server dependencies"
 (cd "$REPO/server" && npm install --omit=dev --no-audit --no-fund)
 
-echo "4/4  Binding Ctrl+Shift+C to Window > Extensions > Claude Console"
+echo "4/4  Binding Ctrl+Option+C to Window > Extensions > Claude Console"
 "$REPO/scripts/set-console-shortcut.sh" || true
 
 NODE="$(command -v node)"
@@ -41,7 +41,7 @@ Done. Next steps:
          "after-effects": { "command": "$NODE", "args": ["$SERVER"] }
        }
 
-  3. Claude Console: press Ctrl+Shift+C in After Effects and type a request.
+  3. Claude Console: press Ctrl+Option+C in After Effects and type a request.
      It runs Claude Code (claude) with your Claude login, so install and log in once:
        curl -fsSL https://claude.ai/install.sh | bash && claude
 

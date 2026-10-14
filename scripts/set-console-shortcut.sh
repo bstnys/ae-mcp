@@ -3,11 +3,11 @@
 # (Window > Extensions > Claude Console). Restart After Effects afterwards.
 #
 # Usage: ./scripts/set-console-shortcut.sh [keys]
-#   keys use macOS notation: ^ Ctrl, ~ Option, $ Shift, @ Cmd. Default: ^$c (Ctrl+Shift+C)
+#   keys use macOS notation: ^ Ctrl, ~ Option, $ Shift, @ Cmd. Default: ^~c (Ctrl+Option+C)
 #   Remove with: ./scripts/set-console-shortcut.sh --remove
 set -euo pipefail
 
-KEYS="${1:-^\$c}"
+KEYS="${1:-^~c}"
 found=0
 for app in /Applications/Adobe\ After\ Effects*/Adobe\ After\ Effects*.app; do
   [ -d "$app" ] || continue

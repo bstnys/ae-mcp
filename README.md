@@ -35,7 +35,7 @@ cd ~/ae-mcp
 1. `extension/`을 `~/Library/Application Support/Adobe/CEP/extensions/com.aemcp.bridge`로 심볼릭 링크
 2. 서명되지 않은 확장을 허용하도록 `com.adobe.CSXS.11~13`의 `PlayerDebugMode`를 1로 설정
 3. `server/` 의존성 설치
-4. Claude Console 단축키(`Ctrl+Shift+C`) 등록
+4. Claude Console 단축키(`Ctrl+Option+C`) 등록
 
 그다음 After Effects를 다시 시작하고 **Window > Extensions > Claude Bridge**를 열어 초록 점을 확인한 뒤, 스크립트가 출력한 명령으로 Claude에 MCP 서버를 등록합니다.
 
@@ -47,7 +47,7 @@ claude mcp add after-effects -- "$(command -v node)" ~/ae-mcp/server/src/index.j
 
 FX Console처럼 단축키로 떠 있는 입력창을 열고, 할 일을 적으면 Claude가 바로 AE를 조작합니다.
 
-- **열기:** `Ctrl+Shift+C` (또는 Window > Extensions > Claude Console)
+- **열기:** `Ctrl+Option+C` (또는 Window > Extensions > Claude Console)
 - **Enter** 보내기 · **Shift+Enter** 줄바꿈 · **Esc** 닫기(작업 중이면 중지) · **↑/↓** 이전 입력 · **⌘N** 새 대화
 - 창을 닫았다 열어도 대화가 이어집니다. 새로 시작하려면 "새 대화"를 누르세요.
 
