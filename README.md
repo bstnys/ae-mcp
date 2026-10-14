@@ -45,7 +45,7 @@ claude mcp add after-effects -- "$(command -v node)" ~/ae-mcp/server/src/index.j
 
 ## Claude Console (AE 안에서 바로 입력)
 
-FX Console처럼 단축키로 떠 있는 입력창을 열고, 할 일을 적으면 Claude가 바로 AE를 조작합니다.
+FX Console처럼 단축키로 입력창 패널을 열고, 할 일을 적으면 Claude가 바로 AE를 조작합니다. 패널 탭을 끌어내 떠 있는 창으로 두면 FX Console처럼 쓸 수 있습니다.
 
 - **열기:** `Ctrl+Option+C` (또는 Window > Extensions > Claude Console)
 - **Enter** 보내기 · **Shift+Enter** 줄바꿈 · **Esc** 닫기(작업 중이면 중지) · **↑/↓** 이전 입력 · **⌘N** 새 대화

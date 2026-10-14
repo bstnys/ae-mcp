@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemcp.bridge" ExtensionBundleVersion="0.2.0"
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemcp.bridge" ExtensionBundleVersion="0.2.1"
     ExtensionBundleName="Claude Bridge" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.aemcp.bridge.panel" Version="0.2.0" />
-    <Extension Id="com.aemcp.bridge.console" Version="0.2.0" />
+    <Extension Id="com.aemcp.bridge.panel" Version="0.2.1" />
+    <Extension Id="com.aemcp.bridge.console" Version="0.2.1" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -55,8 +55,9 @@
           <AutoVisible>true</AutoVisible>
         </Lifecycle>
         <UI>
-          <!-- Floating window, opened from Window > Extensions > Claude Console or its shortcut. -->
-          <Type>Modeless</Type>
+          <!-- A panel (not Modeless): AE lists only panels under Window > Extensions.
+               Undock it to use it as a floating box. -->
+          <Type>Panel</Type>
           <Menu>Claude Console</Menu>
           <Geometry>
             <Size><Height>420</Height><Width>560</Width></Size>
