@@ -1,5 +1,5 @@
 /*
- * Claude Bridge panel (CEP, Node enabled, mixed context).
+ * Claude Bridge panel (CEP, Node enabled).
  *
  * Runs a small HTTP server on 127.0.0.1 that the ae-mcp MCP server talks to.
  * Each POST /rpc {method, params} is forwarded to host.jsx via evalScript and
