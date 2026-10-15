@@ -18,6 +18,10 @@ extension/jsx/host.jsx  (ExtendScript) → After Effects
 - 패널은 AE가 켜질 때 백그라운드에서 자동으로 시작되고, 포트와 토큰을 `~/Library/Application Support/ae-mcp/bridge.json`에 기록합니다. MCP 서버는 매 호출마다 이 파일을 읽으므로 따로 설정할 것이 없습니다.
 - Claude가 한 모든 수정은 `Claude: <작업명>` 실행 취소 그룹으로 묶여서 Cmd+Z 한 번에 되돌릴 수 있습니다.
 
+## 같이 들어 있는 것
+
+- [`effect/`](effect/README.md): Page Turn Pro. CC Page Turn보다 세밀하게 조정할 수 있는 페이지 넘김 이펙트(C++ AE SDK).
+
 ## 요구 사항
 
 - macOS, After Effects 2022 이상 (2026에서 사용 예정)
