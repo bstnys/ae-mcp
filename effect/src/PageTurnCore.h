@@ -323,13 +323,18 @@ public:
         for (int i = 0; i < n; i++) cast += casterAlpha(x - ox + taps[i][0] * soft, y - oy + taps[i][1] * soft);
         cast = cast / n * P.shadowOpacity;
 
-        // Contact shadow under and just ahead of the curl, only where paper is lifting.
+        // Contact shadow under the curl: darkest where the paper leaves the page (u = sv),
+        // fading toward the crest (u = sv - rv) and dying out quickly beyond it, where
+        // nothing hangs overhead. Only on rows where paper is actually lifting.
         float u, v, sv, rv;
         G.toUV(x, y, u, v);
         G.row(v, sv, rv);
         float lifting = srcAlpha(sv - 1, v);
-        float dist = std::abs(u - sv + rv * 0.5f);
-        float contact = P.contact * lifting * std::exp(-dist / (rv * 0.9f + 1)) * std::min(G.lift * 4, 1.0f);
+        float under;
+        if (u >= sv) under = std::exp(-(u - sv) / (rv * 0.5f + 1));
+        else if (u >= sv - rv) under = std::exp(-2 * (sv - u) / rv);
+        else under = std::exp(-2.0f) * std::exp(-(sv - rv - u) / (rv * 0.1f + 1));
+        float contact = P.contact * lifting * under * std::min(G.lift * 4, 1.0f);
         return 1 - (1 - std::min(cast, 1.0f)) * (1 - std::min(contact, 1.0f));
     }
 
