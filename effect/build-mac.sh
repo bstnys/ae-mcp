@@ -18,16 +18,19 @@ examples="$(dirname "$(dirname "$header")")"
 echo "SDK: $examples"
 
 cmake -S "$here" -B "$here/build" -DAE_SDK="$examples" -DCMAKE_BUILD_TYPE=Release
-cmake --build "$here/build" --config Release --target PageTurnPro
+cmake --build "$here/build" --config Release --target PageTurnProBundle
 
 bundle="$here/build/PageTurnPro.plugin"
 ae_app="$(ls -d /Applications/Adobe\ After\ Effects\ 20* 2>/dev/null | sort | tail -1)"
 if [ -n "$ae_app" ]; then
   dest="$ae_app/Plug-ins/PageTurnPro"
-  mkdir -p "$dest"
-  rm -rf "$dest/PageTurnPro.plugin"
-  cp -R "$bundle" "$dest/"
-  echo "Installed to $dest. Restart After Effects; the effect is under Effect > Distort > Page Turn Pro."
+  if mkdir -p "$dest" 2>/dev/null && rm -rf "$dest/PageTurnPro.plugin" && cp -R "$bundle" "$dest/"; then
+    echo "Installed to $dest. Restart After Effects; the effect is under Effect > Distort > Page Turn Pro."
+  else
+    # The Plug-ins folder is usually owned by root.
+    echo "Built $bundle, but $dest is not writable. Install it with:"
+    echo "  sudo mkdir -p \"$dest\" && sudo rm -rf \"$dest/PageTurnPro.plugin\" && sudo cp -R \"$bundle\" \"$dest/\""
+  fi
 else
   echo "Built $bundle. Copy it into your After Effects Plug-ins folder."
 fi

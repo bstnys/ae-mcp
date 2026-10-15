@@ -44,10 +44,16 @@ set(REZ_INCLUDES "")
 foreach(dir ${SDK_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/src")
   list(APPEND REZ_INCLUDES -i "${dir}")
 endforeach()
+# CMAKE_OSX_SYSROOT is empty unless set explicitly; an empty -isysroot makes Rez
+# swallow -useDF and write the PiPL to the resource fork instead.
+set(REZ_SYSROOT "${CMAKE_OSX_SYSROOT}")
+if(NOT REZ_SYSROOT)
+  execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE REZ_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 add_custom_command(
   OUTPUT "${PIPL_RSRC}"
   COMMAND xcrun Rez -o "${PIPL_RSRC}" -define __MACH__ -arch arm64 -arch x86_64 ${REZ_INCLUDES}
-          -isysroot "${CMAKE_OSX_SYSROOT}" -useDF "${CMAKE_CURRENT_SOURCE_DIR}/src/PageTurnProPiPL.r"
+          -isysroot "${REZ_SYSROOT}" -useDF "${CMAKE_CURRENT_SOURCE_DIR}/src/PageTurnProPiPL.r"
   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/PageTurnProPiPL.r"
   COMMENT "Compiling PiPL")
 set_source_files_properties("${PIPL_RSRC}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources GENERATED TRUE)
@@ -64,7 +70,10 @@ set_target_properties(PageTurnPro PROPERTIES
   MACOSX_BUNDLE_GUI_IDENTIFIER com.bstnys.pageturnpro)
 target_link_libraries(PageTurnPro PRIVATE "-framework CoreFoundation")
 
-add_custom_command(TARGET PageTurnPro POST_BUILD
+# Sign in a separate target: the Makefile generator copies the PiPL into the bundle
+# after PageTurnPro's POST_BUILD step, which would leave it outside the seal.
+add_custom_target(PageTurnProBundle ALL
   COMMAND /bin/echo -n "eFKTFXTC" > "$<TARGET_BUNDLE_CONTENT_DIR:PageTurnPro>/PkgInfo"
   COMMAND codesign --force --sign - "$<TARGET_BUNDLE_DIR:PageTurnPro>"
   COMMENT "Writing PkgInfo and ad-hoc signing")
+add_dependencies(PageTurnProBundle PageTurnPro)
