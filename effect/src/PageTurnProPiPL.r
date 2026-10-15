@@ -36,9 +36,10 @@ resource 'PiPL' (16000) {
             PF_PLUG_IN_VERSION,
             PF_PLUG_IN_SUBVERS
         },
-        /* PF_VERSION(0, 1, 0, PF_Stage_DEVELOP, 1) */
+        /* PF_VERSION(0, 1, 0, PF_Stage_DEVELOP, 2). Bump with PTP_BUILD_VERSION on every
+           rebuild: After Effects keys its frame cache on it and shows stale frames otherwise. */
         AE_Effect_Version {
-            32769
+            32770
         },
         AE_Effect_Info_Flags {
             0

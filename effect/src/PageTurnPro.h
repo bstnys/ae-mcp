@@ -17,7 +17,7 @@
 #define PTP_MINOR_VERSION 1
 #define PTP_BUG_VERSION   0
 #define PTP_STAGE_VERSION PF_Stage_DEVELOP
-#define PTP_BUILD_VERSION 1
+#define PTP_BUILD_VERSION 2
 
 // Parameter order. Disk IDs below must never change once projects use the effect.
 enum {
