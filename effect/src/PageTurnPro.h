@@ -17,7 +17,7 @@
 #define PTP_MINOR_VERSION 1
 #define PTP_BUG_VERSION   0
 #define PTP_STAGE_VERSION PF_Stage_DEVELOP
-#define PTP_BUILD_VERSION 2
+#define PTP_BUILD_VERSION 3
 
 // Parameter order. Disk IDs below must never change once projects use the effect.
 enum {
@@ -55,6 +55,7 @@ enum {
     PTP_SHADOW_DISTANCE,
     PTP_SHADOW_SOFTNESS,
     PTP_CONTACT,
+    PTP_SHADOW_MASK,
     PTP_SHADOW_END,
 
     PTP_BACK_TOPIC,
@@ -116,7 +117,8 @@ enum {
     ID_BACK_ROTATION,
     ID_BACK_END,
     ID_RENDER,
-    ID_QUALITY
+    ID_QUALITY,
+    ID_SHADOW_MASK
 };
 
 extern "C" {

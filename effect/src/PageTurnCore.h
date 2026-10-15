@@ -26,6 +26,7 @@ inline RGBA over(const RGBA &top, const RGBA &bottom) {
 
 enum Corner { TopLeft = 0, TopRight = 1, BottomLeft = 2, BottomRight = 3 };
 enum BackMirror { MirrorAuto = 0, MirrorNone = 1, MirrorHorizontal = 2, MirrorVertical = 3 };
+enum ShadowMask { ShadowOnPage = 0, ShadowOnEverything = 1 };
 enum RenderMode { RenderFull = 0, RenderNoShadow = 1, RenderTurnedOnly = 2, RenderShadowOnly = 3, RenderFrontOnly = 4 };
 
 struct Params {
@@ -55,6 +56,7 @@ struct Params {
     float shadowDistance = 18;  // px at full lift
     float shadowSoftness = 24;  // px
     float contact = 0.45f;      // darkening under the curl, 0..1
+    int shadowMask = ShadowOnPage; // where shadow may land: the flat page only, or also layers below
     // Back page
     float paper[3] = {0.93f, 0.92f, 0.88f};
     float backOpacity = 1;   // how much of the back layer shows over paper color
@@ -258,6 +260,18 @@ public:
         default: break;
         }
         float sa = shadow(x, y);
+        if (P.shadowMask == ShadowOnPage) {
+            // The shadow only lands on the page still lying flat: mask it by the front's
+            // alpha so it never spills onto the area the turn uncovers or past the layer's
+            // edges, and darken the front without changing its alpha.
+            sa *= front.a;
+            RGBA sh = {P.shadowColor[0] * sa, P.shadowColor[1] * sa, P.shadowColor[2] * sa, sa};
+            if (P.render == RenderShadowOnly) return sh;
+            float keep = front.a > 0 ? 1 - sa / front.a : 1;
+            RGBA shaded = {front.r * keep + sh.r, front.g * keep + sh.g, front.b * keep + sh.b, front.a};
+            return over(turned, shaded);
+        }
+        // Also shadow whatever lies below the layer, where the turn uncovers it.
         RGBA sh = {P.shadowColor[0] * sa, P.shadowColor[1] * sa, P.shadowColor[2] * sa, sa};
         if (P.render == RenderShadowOnly) return sh;
         return over(turned, over(sh, front));
@@ -323,15 +337,15 @@ public:
         for (int i = 0; i < n; i++) cast += casterAlpha(x - ox + taps[i][0] * soft, y - oy + taps[i][1] * soft);
         cast = cast / n * P.shadowOpacity;
 
-        // Contact shadow under the curl: darkest where the paper leaves the page (u = sv),
-        // fading toward the crest (u = sv - rv) and dying out quickly beyond it, where
-        // nothing hangs overhead. Only on rows where paper is actually lifting.
+        // Contact shadow under the curl. Ahead of the fold the paper lies on the page,
+        // so it only darkens the page itself; under the curl it fades toward the crest
+        // and dies out quickly past it, where nothing hangs overhead.
         float u, v, sv, rv;
         G.toUV(x, y, u, v);
         G.row(v, sv, rv);
         float lifting = srcAlpha(sv - 1, v);
         float under;
-        if (u >= sv) under = std::exp(-(u - sv) / (rv * 0.5f + 1));
+        if (u >= sv) under = std::exp(-(u - sv) / (rv * 0.3f + 1)) * srcAlpha(u, v);
         else if (u >= sv - rv) under = std::exp(-2 * (sv - u) / rv);
         else under = std::exp(-2.0f) * std::exp(-(sv - rv - u) / (rv * 0.1f + 1));
         float contact = P.contact * lifting * under * std::min(G.lift * 4, 1.0f);

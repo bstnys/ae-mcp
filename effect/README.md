@@ -23,6 +23,7 @@ CC Page Turn을 대신하는 페이지 넘김 이펙트입니다. C++ After Effe
 | | Ambient, Specular, Shininess | 무광지 ↔ 광택지 표현 |
 | Shadow | Color, Opacity, Direction, Distance, Softness | 넘어가는 종이가 아래 페이지와 배경에 드리우는 그림자. 들릴수록 멀어짐 |
 | | Contact Shadow | 말린 부분 밑의 어두움 |
+| | Shadow On | 페이지에만(기본, 페이지 밖과 넘어가며 드러난 곳에는 그림자 없음) / 페이지와 아래 레이어 모두 |
 | Back Page | Back Layer, Back Opacity, Paper Color | 뒷면 레이어와 종이 색 |
 | | Back Mirror | 자동(넘김 방향에 맞게 뒤집어 바르게 읽힘) / 없음 / 가로 / 세로 |
 | | Back Offset X/Y, Back Scale, Back Rotation | 뒷면 이미지 위치·크기·회전 |

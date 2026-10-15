@@ -112,6 +112,7 @@ ptp::Params readParams(PF_InData *in_data, PF_ParamDef *params[]) {
     p.shadowDistance = slider(params[PTP_SHADOW_DISTANCE]) * ds;
     p.shadowSoftness = slider(params[PTP_SHADOW_SOFTNESS]) * ds;
     p.contact = slider(params[PTP_CONTACT]) / 100.0f;
+    p.shadowMask = params[PTP_SHADOW_MASK]->u.pd.value == 2 ? ptp::ShadowOnEverything : ptp::ShadowOnPage;
 
     p.backOpacity = slider(params[PTP_BACK_OPACITY]) / 100.0f;
     PF_Pixel pc = params[PTP_PAPER_COLOR]->u.cd.value;
@@ -212,6 +213,8 @@ PF_Err ParamsSetup(PF_InData *in_data, PF_OutData *out_data) {
     PF_ADD_FLOAT_SLIDERX("Shadow Softness", 0, 500, 0, 100, 24, PF_Precision_TENTHS, PF_ValueDisplayFlag_NONE, 0, ID_SHADOW_SOFTNESS);
     AEFX_CLR_STRUCT(def);
     PF_ADD_FLOAT_SLIDERX("Contact Shadow", 0, 100, 0, 100, 45, PF_Precision_INTEGER, PF_ValueDisplayFlag_PERCENT, 0, ID_CONTACT);
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_POPUP("Shadow On", 2, 1, "Page Only|Page and Layers Below", ID_SHADOW_MASK);
     AEFX_CLR_STRUCT(def);
     PF_END_TOPIC(ID_SHADOW_END);
 
