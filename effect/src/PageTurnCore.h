@@ -146,9 +146,13 @@ public:
         flatDiffuse = amb + (1 - amb) * std::max(lz, 0.0f);
         flatSpec = std::pow(std::max(hvz, 0.0f), p.shininess);
 
+        // Shadow direction in (u, v), and how far it travels per pixel of paper height:
+        // the flap, at height 2r, lands Shadow Distance away at full lift.
         float sa = p.shadowAngleDeg * pi / 180.0f;
-        shx = std::sin(sa) * p.shadowDistance;
-        shy = -std::cos(sa) * p.shadowDistance;
+        float sdx = std::sin(sa), sdy = -std::cos(sa);
+        sdu = sdx * dx + sdy * dy;
+        sdv = sdx * ex + sdy * ey;
+        slope = std::max(p.shadowDistance, 0.0f) * lift / (2 * r);
 
         mirror = p.backMirror;
         if (mirror == MirrorAuto) mirror = p.vertical ? MirrorVertical : MirrorHorizontal;
@@ -195,7 +199,7 @@ public:
     // Area that can contain output pixels, in layer pixels.
     Rect bounds() const {
         float pad = 2 * r * (1 + std::abs(P.cone)) + std::abs(P.bend) * 0.25f * span +
-                    std::abs(P.shadowDistance) + std::abs(P.shadowSoftness) + 4;
+                    std::abs(P.shadowDistance) * (1 + std::abs(P.cone)) + std::abs(P.shadowSoftness) + 4;
         Rect b = {0, 0, w, h};
         float cs[4][2] = {{0, 0}, {w, 0}, {0, h}, {w, h}};
         float axis = s - 3.14159265f * r * 0.5f; // the flat flap mirrors around this line
@@ -217,7 +221,7 @@ public:
     float cx, cy, dx, dy, ex, ey;
     float vmin, vmax, span;
     float lx, ly, lz, hvx, hvy, hvz, amb, flatDiffuse, flatSpec;
-    float shx, shy;
+    float sdu, sdv, slope;
     int mirror;
     float bcos, bsin;
 };
@@ -303,38 +307,52 @@ public:
         return out;
     }
 
-    // Opacity of the turned paper at (x, y), used as the shadow caster.
-    float casterAlpha(float x, float y) const {
+    // How much of the light reaching the page at (x, y) the turned paper blocks.
+    // The light comes down at a slant: a point of paper at height z throws its shadow
+    // z * slope pixels along the shadow direction, so paper still touching the page
+    // shadows right next to itself and the flat flap (at height 2r) the furthest.
+    // Each row's curl is a half circle of radius rv centred at (sv, rv) in (u, z),
+    // with the flap lying flat on top of it at z = 2rv for u >= sv.
+    float occlusion(float x, float y) const {
         float u, v, sv, rv;
         G.toUV(x, y, u, v);
-        G.row(v, sv, rv);
         const float pi = 3.14159265f;
-        float a = 0;
-        if (u >= sv) a = srcAlpha(sv - (u - sv + pi * rv), v);
-        float k = sv - u;
-        if (k >= 0 && k <= rv) {
-            float phi1 = std::asin(std::min(k / rv, 1.0f));
-            float a2 = srcAlpha(sv - rv * (pi - phi1), v);
-            float a1 = srcAlpha(sv - rv * phi1, v);
-            float c = a2 + a1 * (1 - a2);
-            a = a + c * (1 - a);
+        float a = G.sdu * G.slope, b = G.sdv * G.slope; // horizontal travel per unit height, in u and v
+        // The curl of the row the ray passes at mid height (matters with cone and bend).
+        G.row(v, sv, rv);
+        G.row(v - b * rv, sv, rv);
+        float X = u - sv;
+        float lit = 1;
+        // Curl: (X - a z)^2 + (z - rv)^2 = rv^2 on the side X - a z <= 0.
+        float A = a * a + 1, B = a * X + rv, C = X * X;
+        float disc = B * B - A * C;
+        if (disc >= 0) {
+            float sq = std::sqrt(disc);
+            for (int i = 0; i < 2; i++) {
+                float z = (B + (i ? sq : -sq)) / A;
+                float hx = X - a * z;
+                if (z < 0 || hx > 0) continue;
+                float phi = std::atan2(-hx, rv - z);
+                lit *= 1 - srcAlpha(sv - rv * phi, v - b * z);
+            }
         }
-        return a;
+        // Flat flap at z = 2rv.
+        float z = 2 * rv, qu = u - a * z;
+        if (qu >= sv) lit *= 1 - srcAlpha(sv - (qu - sv + pi * rv), v - b * z);
+        return 1 - lit;
     }
 
     float shadow(float x, float y) const {
         if (G.tt <= 0 || G.tt >= 1) return 0;
-        // Cast shadow: the turned paper's footprint, offset away from the light and
-        // softened with a fixed disk of taps.
+        // Cast shadow, softened with a fixed disk of taps.
         static const float taps[13][2] = {{0, 0},         {1, 0},          {-1, 0},       {0, 1},
                                           {0, -1},        {0.7f, 0.7f},    {-0.7f, 0.7f}, {0.7f, -0.7f},
                                           {-0.7f, -0.7f}, {0.5f, 0},       {-0.5f, 0},    {0, 0.5f},
                                           {0, -0.5f}};
-        float ox = G.shx * G.lift, oy = G.shy * G.lift;
         float soft = std::max(P.shadowSoftness, 0.0f) * 0.5f;
         int n = soft < 0.5f ? 1 : 13;
         float cast = 0;
-        for (int i = 0; i < n; i++) cast += casterAlpha(x - ox + taps[i][0] * soft, y - oy + taps[i][1] * soft);
+        for (int i = 0; i < n; i++) cast += occlusion(x + taps[i][0] * soft, y + taps[i][1] * soft);
         cast = cast / n * P.shadowOpacity;
 
         // Contact shadow under the curl. Ahead of the fold the paper lies on the page,

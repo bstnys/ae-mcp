@@ -21,7 +21,7 @@ CC Page Turn을 대신하는 페이지 넘김 이펙트입니다. C++ After Effe
 | | Fold Bend | 접힘선을 곡선으로 휘게 함 |
 | Lighting | Light Direction, Light Height | 빛 방향과 높이(실제 곡면 노멀로 계산) |
 | | Ambient, Specular, Shininess | 무광지 ↔ 광택지 표현 |
-| Shadow | Color, Opacity, Direction, Distance, Softness | 넘어가는 종이가 아래 페이지와 배경에 드리우는 그림자. 들릴수록 멀어짐 |
+| Shadow | Color, Opacity, Direction, Distance, Softness | 넘어가는 종이가 아래 페이지에 드리우는 그림자. 종이 각 부분의 높이로 계산해서 접힌 선에서 시작하고 높이 들린 곳일수록 멀리 떨어짐. Distance는 넘어간 종이(가장 높은 부분)의 그림자가 떨어지는 거리. Light Direction을 바꾸면 Shadow Direction도 반대쪽으로 맞추세요 |
 | | Contact Shadow | 말린 부분 밑의 어두움 |
 | | Shadow On | 페이지에만(기본, 페이지 밖과 넘어가며 드러난 곳에는 그림자 없음) / 페이지와 아래 레이어 모두 |
 | Back Page | Back Layer, Back Opacity, Paper Color | 뒷면 레이어와 종이 색 |
@@ -62,4 +62,4 @@ CC Page Turn을 대신하는 페이지 넘김 이펙트입니다. C++ After Effe
 - 8/16비트만 지원합니다. 32비트(float)는 SmartFX로 옮길 때 추가 예정입니다.
 - CPU 렌더링입니다(GPU 미지원).
 - macOS 빌드만 구성되어 있습니다.
-- 그림자는 넘어가는 종이의 실루엣을 빛 반대 방향으로 밀어 부드럽게 만든 근사치입니다.
+- 그림자 방향은 Light Direction과 따로 정합니다(자동으로 연동되지 않음).
