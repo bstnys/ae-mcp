@@ -322,8 +322,11 @@ PF_Err Render(PF_InData *in_data, PF_OutData * /*out_data*/, PF_ParamDef *params
 extern "C" DllExport PF_Err PluginDataEntryFunction2(PF_PluginDataPtr inPtr, PF_PluginDataCB2 inPluginDataCallBackPtr,
                                                      SPBasicSuite * /*inSPBasicSuitePtr*/,
                                                      const char * /*inHostName*/, const char * /*inHostVersion*/) {
-    return PF_REGISTER_EFFECT_EXT2(inPtr, inPluginDataCallBackPtr, PTP_NAME, PTP_MATCH_NAME, PTP_CATEGORY,
-                                   AE_RESERVED_INFO, "EffectMain", "https://github.com/bstnys/ae-mcp");
+    // PF_REGISTER_EFFECT_EXT2 expands to code that assigns to a local named `result`.
+    PF_Err result = PF_Err_INVALID_CALLBACK;
+    result = PF_REGISTER_EFFECT_EXT2(inPtr, inPluginDataCallBackPtr, PTP_NAME, PTP_MATCH_NAME, PTP_CATEGORY,
+                                     AE_RESERVED_INFO, "EffectMain", "https://github.com/bstnys/ae-mcp");
+    return result;
 }
 
 PF_Err EffectMain(PF_Cmd cmd, PF_InData *in_data, PF_OutData *out_data, PF_ParamDef *params[], PF_LayerDef *output,
