@@ -1,6 +1,11 @@
-# Builds the Page Turn Pro After Effects effect (macOS, arm64 + x86_64).
-#   cmake -S effect -B effect/build -DAE_SDK=/path/to/AfterEffectsSDK/Examples
-#   cmake --build effect/build --config Release
+# Builds the Page Turn Pro After Effects effect.
+#   macOS (arm64 + x86_64 .plugin):
+#     cmake -S effect -B effect/build -DAE_SDK=/path/to/AfterEffectsSDK/Examples
+#     cmake --build effect/build --config Release
+#   Windows x64 (.aex), with Visual Studio on Windows:
+#     cmake -S effect -B effect/build-win -A x64 -DAE_SDK=C:/path/to/AfterEffectsSDK/Examples
+#     cmake --build effect/build-win --config Release
+#   Windows x64 (.aex), cross-compiled with MinGW-w64 on macOS or Linux: effect/build-win.sh
 # The rendering core and its off-host test build anywhere: -DPTP_TEST_ONLY=ON.
 cmake_minimum_required(VERSION 3.20)
 project(PageTurnPro CXX)
@@ -19,8 +24,8 @@ if(PTP_TEST_ONLY)
   return()
 endif()
 
-if(NOT APPLE)
-  message(FATAL_ERROR "Only the macOS build is set up. Use -DPTP_TEST_ONLY=ON elsewhere.")
+if(NOT APPLE AND NOT WIN32)
+  message(FATAL_ERROR "Builds for macOS or Windows only. Use -DPTP_TEST_ONLY=ON elsewhere.")
 endif()
 
 set(AE_SDK "" CACHE PATH "After Effects SDK 'Examples' folder (contains Headers, Resources, Util)")
@@ -28,15 +33,20 @@ if(NOT EXISTS "${AE_SDK}/Headers/AE_Effect.h")
   message(FATAL_ERROR "Set -DAE_SDK to the SDK's Examples folder (looked for ${AE_SDK}/Headers/AE_Effect.h)")
 endif()
 
-set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "" FORCE)
-
 set(SDK_INCLUDES
   "${AE_SDK}/Headers"
   "${AE_SDK}/Headers/SP"
   "${AE_SDK}/Headers/adobesdk"
   "${AE_SDK}/Resources"
   "${AE_SDK}/Util")
+
+if(WIN32)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/win/Windows.cmake")
+  return()
+endif()
+
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "" FORCE)
 
 # PiPL resource, compiled by Rez into the bundle's Resources folder.
 set(PIPL_RSRC "${CMAKE_CURRENT_BINARY_DIR}/PageTurnPro.rsrc")

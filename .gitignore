@@ -3,3 +3,4 @@ node_modules/
 *.zxp
 effect/build/
 build-test/
+effect/build-win/
