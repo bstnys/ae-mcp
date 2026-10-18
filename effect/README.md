@@ -65,6 +65,7 @@ CC Page Turn을 대신하는 페이지 넘김 이펙트입니다. C++ After Effe
 - `src/PageTurnCore.h`: 렌더링 코어. AE에 의존하지 않는 순수 C++입니다. 출력 픽셀마다 역으로 종이의 어느 지점이 보이는지 계산합니다(평평한 앞면, 원통 아랫면, 원통 윗면의 뒷면, 넘어간 뒷면 순으로 겹침).
 - `src/PageTurnPro.cpp`: AE SDK 연결부. 파라미터, 출력 버퍼 확장(FRAME_SETUP), 8/16비트 픽셀 변환, 행 단위 병렬 렌더.
 - `src/PageTurnProPiPL.r`: PiPL 리소스. 버전과 플래그는 `GlobalSetup`과 같아야 합니다.
+- `test/win_host.cpp`: `.aex`를 AE처럼 불러 한 프레임을 렌더하는 가짜 호스트(Wine이나 윈도우에서 실행). 윈도우 빌드 확인용.
 - `test/render_core.cpp`: 코어만 렌더해 PPM으로 저장하는 확인용 프로그램.
   ```bash
   cmake -S effect -B build-test -DPTP_TEST_ONLY=ON && cmake --build build-test

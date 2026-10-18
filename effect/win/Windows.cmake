@@ -26,6 +26,6 @@ if(MSVC)
   set_property(TARGET PageTurnPro PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
 else()
   # MinGW: link the C and C++ runtimes in so the .aex needs no extra DLLs.
-  target_compile_options(PageTurnPro PRIVATE -O3 -Wall)
-  target_link_options(PageTurnPro PRIVATE -static -static-libgcc -static-libstdc++)
+  target_compile_options(PageTurnPro PRIVATE -O3 -Wall -Wno-unknown-pragmas -Wno-multichar)
+  target_link_options(PageTurnPro PRIVATE -static -static-libgcc -static-libstdc++ -s)
 endif()

@@ -13,7 +13,7 @@ import re
 import struct
 import sys
 
-# key, vendor, payload kind. OSTypes are written as 32-bit integers, which is why they
+# key, vendor, payload kind, as in the SDK's Resources/AE_General.r. OSTypes are written as 32-bit integers, which is why they
 # read reversed ("MIB8") in a PiPLtool .rc file.
 PROPS = {
     "Kind": ("kind", "8BIM", "ostype"),
@@ -30,7 +30,7 @@ PROPS = {
     "AE_Effect_Global_OutFlags": ("eGLO", "8BIM", "long"),
     "AE_Effect_Global_OutFlags_2": ("eGL2", "8BIM", "long"),
     "AE_Effect_Match_Name": ("eMNA", "8BIM", "pstring"),
-    "AE_Reserved_Info": ("aeRD", "8BIM", "long"),
+    "AE_Reserved_Info": ("aeFL", "8BIM", "long"),
     "AE_Effect_Support_URL": ("eURL", "8BIM", "pstring"),
 }
 KINDS = {"AEEffect": "eFKT"}
@@ -117,8 +117,11 @@ def build(r_text, vers_text, defines, big_endian):
             data = struct.pack(e + "h", vals[0])
         else:
             data = struct.pack(e + "I", vals[0] & 0xFFFFFFFF)
-        data += b"\0" * (-len(data) % 4)
-        props.append(ostype(vendor) + ostype(key) + struct.pack(e + "II", 0, len(data)) + data)
+        # Lengths as PiPLtool writes them: padded to the next long, except eINF, which
+        # declares its 2 bytes and is still followed by a full long.
+        length = len(data) if kind == "short" else len(data) + (-len(data) % 4)
+        props.append(ostype(vendor) + ostype(key) + struct.pack(e + "II", 0, length) + data +
+                     b"\0" * (-len(data) % 4))
     return struct.pack(e + "hII", 1, 0, len(props)) + b"".join(props)
 
 
