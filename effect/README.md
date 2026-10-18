@@ -46,6 +46,20 @@ CC Page Turn을 대신하는 페이지 넘김 이펙트입니다. C++ After Effe
    ```
 4. After Effects를 다시 시작합니다.
 
+## 빌드 (Windows)
+
+윈도우용 `.aex`는 두 가지 방법으로 만들 수 있습니다. 윈도우용 리소스(PiPL)는 `win/make_pipl.py`가 `src/PageTurnProPiPL.r`에서 바로 만들기 때문에 SDK의 PiPLtool이 필요 없습니다.
+
+- **윈도우 PC에서 (Visual Studio):** Visual Studio 2019 이상(또는 Build Tools)의 "C++를 사용한 데스크톱 개발", CMake, Python 3을 설치한 뒤 PowerShell에서 실행합니다. 빌드한 뒤 관리자 확인 창을 한 번 띄워 After Effects 플러그인 폴더에 설치합니다.
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File effect\build-win.ps1 C:\path\to\AfterEffectsSDK
+  ```
+- **맥이나 리눅스에서 (MinGW-w64 크로스 빌드):** `brew install mingw-w64`(리눅스는 `apt install mingw-w64`) 후 실행합니다. 런타임을 정적으로 링크하므로 `.aex` 하나만 윈도우 PC로 옮기면 됩니다.
+  ```bash
+  ./effect/build-win.sh ~/Downloads/AfterEffectsSDK
+  ```
+  결과물 `effect/build-win/PageTurnPro.aex`를 `C:\Program Files\Adobe\Adobe After Effects 20xx\Support Files\Plug-ins\PageTurnPro\`에 넣고 After Effects를 다시 시작합니다.
+
 ## 구조
 
 - `src/PageTurnCore.h`: 렌더링 코어. AE에 의존하지 않는 순수 C++입니다. 출력 픽셀마다 역으로 종이의 어느 지점이 보이는지 계산합니다(평평한 앞면, 원통 아랫면, 원통 윗면의 뒷면, 넘어간 뒷면 순으로 겹침).
@@ -61,5 +75,5 @@ CC Page Turn을 대신하는 페이지 넘김 이펙트입니다. C++ After Effe
 
 - 8/16비트만 지원합니다. 32비트(float)는 SmartFX로 옮길 때 추가 예정입니다.
 - CPU 렌더링입니다(GPU 미지원).
-- macOS 빌드만 구성되어 있습니다.
+- 윈도우는 x64만 지원합니다(ARM64 미지원). 윈도우 빌드는 아직 실제 After Effects에서 확인하지 못했습니다.
 - 그림자 방향은 Light Direction과 따로 정합니다(자동으로 연동되지 않음).
