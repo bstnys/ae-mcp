@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 *.zxp
+effect/build/
+build-test/
+effect/build-win/
