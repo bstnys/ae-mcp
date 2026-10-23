@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AE Tetris</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #232323; color: #d6d6d6; overflow: hidden;
+      font: 12px -apple-system, "Segoe UI", "Helvetica Neue", sans-serif; user-select: none; }
+    #wrap { display: flex; height: 100%; padding: 10px; box-sizing: border-box; gap: 10px; justify-content: center; outline: none; }
+    #boardBox { position: relative; height: 100%; }
+    #board { display: block; height: 100%; background: #161616; border: 1px solid #3a3a3a; border-radius: 4px; }
+    #side { display: flex; flex-direction: column; gap: 8px; min-width: 84px; overflow: hidden; }
+    .stats { display: flex; gap: 8px; }
+    .stats > div { flex: 1; }
+    @media (max-height: 560px) { #keys { display: none; } }
+    .box { background: #1b1b1b; border: 1px solid #333; border-radius: 4px; padding: 6px; }
+    .label { font-size: 10px; letter-spacing: .08em; color: #8a8a8a; text-transform: uppercase; margin-bottom: 4px; }
+    .value { font: 600 16px Menlo, Consolas, monospace; color: #eee; }
+    canvas.mini { display: block; width: 72px; }
+    #overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(18,18,18,.82); text-align: center; gap: 8px; border-radius: 4px; }
+    #overlay.hidden { display: none; }
+    #overlay h1 { margin: 0; font-size: 22px; color: #fff; letter-spacing: .06em; }
+    #overlay p { margin: 0; color: #aaa; line-height: 1.6; }
+    button { background: #2d8ceb; color: #fff; border: 0; border-radius: 5px; padding: 6px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+    button:hover { background: #3a97f0; }
+    #keys { font-size: 10px; color: #777; line-height: 1.7; margin-top: auto; }
+    #keys b { color: #aaa; font-weight: 500; }
+    #focusHint { color: #e0b252; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="wrap" tabindex="0">
+    <div id="boardBox">
+      <canvas id="board"></canvas>
+      <div id="overlay">
+        <h1 id="ovTitle">AE TETRIS</h1>
+        <p id="ovText">패널을 클릭한 뒤<br>Enter 또는 버튼으로 시작</p>
+        <button id="startBtn" type="button">시작</button>
+      </div>
+    </div>
+    <div id="side">
+      <div class="box"><div class="label">Hold</div><canvas id="hold" class="mini"></canvas></div>
+      <div class="box"><div class="label">Next</div><canvas id="next" class="mini"></canvas></div>
+      <div class="box"><div class="label">Score</div><div class="value" id="score">0</div></div>
+      <div class="box stats">
+        <div><div class="label">Lines</div><div class="value" id="lines">0</div></div>
+        <div><div class="label">Level</div><div class="value" id="level">1</div></div>
+      </div>
+      <div class="box"><div class="label">Best</div><div class="value" id="best">0</div></div>
+      <div id="keys">
+        <b>← →</b> 이동<br><b>↓</b> 소프트 드롭<br><b>Space</b> 하드 드롭<br>
+        <b>↑ / X</b> 회전 · <b>Z</b> 반대<br><b>C / Shift</b> 홀드<br><b>P / Esc</b> 일시정지<br><b>R</b> 재시작
+        <div id="focusHint"></div>
+      </div>
+    </div>
+  </div>
+  <script src="js/tetris.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
