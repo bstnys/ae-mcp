@@ -1,0 +1,32 @@
+/* Shared layout for the board games (chess, gomoku). Board size is set by Arcade.fitSquare. */
+html, body { margin: 0; height: 100%; background: #232323; color: #d6d6d6; overflow: hidden;
+  font: 12px -apple-system, "Segoe UI", "Helvetica Neue", sans-serif; user-select: none; }
+#wrap { display: flex; height: 100%; padding: 10px; box-sizing: border-box; gap: 10px; justify-content: center; align-items: flex-start; outline: none; }
+#wrap.below { flex-direction: column; align-items: center; }
+#boardBox { position: relative; flex: none; }
+#board { display: block; border-radius: 4px; cursor: pointer; }
+#side { display: flex; flex-direction: column; gap: 8px; min-height: 0; box-sizing: border-box; flex: none; }
+#wrap.below #side { gap: 6px; }
+.title { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: .04em; }
+#wrap.below .title { display: none; }
+.status { background: #1b1b1b; border: 1px solid #333; border-radius: 4px; padding: 7px 9px; color: #eee; font-weight: 600; min-height: 16px; }
+.status.win { border-color: #4caf50; color: #9be29f; }
+.status.lose { border-color: #e05252; color: #f0a0a0; }
+.status.think { color: #e0b252; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.row label { display: flex; align-items: center; gap: 4px; color: #9a9a9a; }
+.foot { margin-top: auto; }
+select { background: #2a2a2a; color: #ddd; border: 1px solid #444; border-radius: 4px; padding: 2px 4px; font: inherit; }
+button { background: #2d8ceb; color: #fff; border: 0; border-radius: 5px; padding: 5px 10px; font: inherit; font-weight: 600; cursor: pointer; }
+button:hover { background: #3a97f0; }
+button.ghost { background: #2c2c2c; color: #bbb; font-weight: 500; }
+button.ghost:hover { color: #fff; background: #383838; }
+button:disabled { opacity: .45; cursor: default; }
+.moves { flex: 1; min-height: 40px; overflow-y: auto; background: #1b1b1b; border: 1px solid #333; border-radius: 4px; padding: 6px 8px;
+  font: 11px/1.7 Menlo, Consolas, monospace; color: #bbb; }
+.moves .n { color: #666; display: inline-block; width: 2.6em; }
+.moves .m { display: inline-block; width: 5.2em; }
+.info { color: #8a8a8a; line-height: 1.6; }
+#promo { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(0,0,0,.55); border-radius: 4px; }
+#promo.hidden { display: none; }
+#promo button { font-size: 30px; line-height: 1; padding: 6px 10px; background: #eee; color: #111; }

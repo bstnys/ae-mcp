@@ -10,7 +10,7 @@
       padding: 16px; box-sizing: border-box; gap: 14px; outline: none; }
     h1 { margin: 0; font-size: 20px; letter-spacing: .14em; color: #fff; }
     #games { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
-    .game { flex: 1 1 140px; max-width: 220px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px;
+    .game { flex: 1 1 130px; max-width: 200px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px;
       padding: 12px; cursor: pointer; text-align: left; color: inherit; font: inherit; display: flex; flex-direction: column; gap: 8px; }
     .game:hover { background: #222; border-color: #555; }
     .game.sel { border-color: #2d8ceb; box-shadow: 0 0 0 1px #2d8ceb inset; }
@@ -36,8 +36,18 @@
         <span class="name">2 · 벽돌깨기</span>
         <span class="meta"><span>최고 점수</span><b id="bestBreakout">0</b></span>
       </button>
+      <button class="game" data-game="gomoku" type="button">
+        <canvas id="pvGomoku" width="240" height="180"></canvas>
+        <span class="name">3 · 오목</span>
+        <span class="meta"><span>AI 상대</span><b id="levelGomoku">보통</b></span>
+      </button>
+      <button class="game" data-game="chess" type="button">
+        <canvas id="pvChess" width="240" height="180"></canvas>
+        <span class="name">4 · 체스</span>
+        <span class="meta"><span>AI 상대</span><b id="levelChess">보통</b></span>
+      </button>
     </div>
-    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1 / 2</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
+    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1~4</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
   </div>
   <script src="js/arcade.js"></script>
   <script>
@@ -61,6 +71,8 @@
       else if (e.code === 'Enter' || e.code === 'Space') Arcade.open(cards[sel].dataset.game);
       else if (e.code === 'Digit1') Arcade.open('tetris');
       else if (e.code === 'Digit2') Arcade.open('breakout');
+      else if (e.code === 'Digit3') Arcade.open('gomoku');
+      else if (e.code === 'Digit4') Arcade.open('chess');
       else return;
       e.preventDefault();
     });
@@ -85,6 +97,33 @@
     }
     b.fillStyle = '#ddd'; b.fillRect(100, 160, 50, 7);
     b.fillStyle = '#fff'; b.beginPath(); b.arc(138, 120, 5, 0, Math.PI * 2); b.fill();
+
+    var LV = { easy: '쉬움', normal: '보통', hard: '어려움' };
+    document.getElementById('levelGomoku').textContent = LV[Arcade.loadText('aeGomokuLevel', 'normal')];
+    document.getElementById('levelChess').textContent = LV[Arcade.loadText('aeChessLevel', 'normal')];
+
+    var o = document.getElementById('pvGomoku').getContext('2d');
+    o.fillStyle = '#d4a85f'; o.fillRect(30, 0, 180, 180);
+    o.strokeStyle = 'rgba(60,40,15,.7)';
+    for (var i = 0; i < 9; i++) {
+      o.beginPath(); o.moveTo(40, 10 + i * 20 + .5); o.lineTo(200, 10 + i * 20 + .5); o.stroke();
+      o.beginPath(); o.moveTo(40 + i * 20 + .5, 10); o.lineTo(40 + i * 20 + .5, 170); o.stroke();
+    }
+    [[4, 4, 1], [3, 5, 2], [5, 3, 1], [3, 3, 2], [6, 2, 1], [4, 5, 2], [2, 6, 1], [5, 5, 2], [3, 4, 1]].forEach(function (s) {
+      o.fillStyle = s[2] === 1 ? '#151515' : '#f2f2f2';
+      o.beginPath(); o.arc(40 + s[0] * 20, 10 + s[1] * 20, 8.5, 0, Math.PI * 2); o.fill();
+    });
+
+    var ch = document.getElementById('pvChess').getContext('2d');
+    for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) {
+      ch.fillStyle = (x + y) % 2 ? '#7a8c9e' : '#d6dde4'; ch.fillRect(48 + x * 18, 18 + y * 18, 18, 18);
+    }
+    ch.font = '16px "Apple Symbols", "Segoe UI Symbol", serif'; ch.textAlign = 'center'; ch.textBaseline = 'middle';
+    [['♜', 0, 0, 0], ['♚', 6, 0, 0], ['♟', 5, 1, 0], ['♟', 6, 1, 0], ['♞', 2, 2, 0], ['♛', 3, 4, 1], ['♝', 2, 4, 1],
+     ['♟', 4, 4, 1], ['♟', 3, 6, 1], ['♚', 4, 7, 1], ['♜', 7, 7, 1]].forEach(function (p) {
+      ch.fillStyle = p[3] ? '#fafafa' : '#1d1d1d'; ch.strokeStyle = '#222';
+      ch.strokeText(p[0], 57 + p[1] * 18, 28 + p[2] * 18); ch.fillText(p[0], 57 + p[1] * 18, 28 + p[2] * 18);
+    });
   })();
   </script>
 </body>

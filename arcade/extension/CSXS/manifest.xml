@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemcp.arcade" ExtensionBundleVersion="1.1.0"
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemcp.arcade" ExtensionBundleVersion="1.2.0"
     ExtensionBundleName="AE Arcade" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
     <Extension Id="com.aemcp.arcade.panel" Version="1.0.0" />

@@ -6,9 +6,9 @@
 'use strict';
 
 // Mac virtual key codes and Windows VK codes for the keys the games use: arrows, Space, Return, Esc,
-// Shifts, Backspace and the letters A C D M P R S W X Z plus 1-2.
-var MAC = [123, 124, 125, 126, 49, 36, 53, 56, 60, 51, 0, 8, 2, 46, 35, 15, 1, 13, 7, 6, 18, 19];
-var WIN = [37, 38, 39, 40, 32, 13, 27, 16, 8, 65, 67, 68, 77, 80, 82, 83, 87, 88, 90, 49, 50];
+// Shifts, Backspace and the letters A C D M N P R S U W X Z plus 1-4.
+var MAC = [123, 124, 125, 126, 49, 36, 53, 56, 60, 51, 0, 8, 2, 46, 45, 35, 15, 1, 32, 13, 7, 6, 18, 19, 20, 21];
+var WIN = [37, 38, 39, 40, 32, 13, 27, 16, 8, 65, 67, 68, 77, 78, 80, 82, 83, 85, 87, 88, 90, 49, 50, 51, 52];
 
 var Arcade = {
   // Ask After Effects to send these keys to the panel instead of handling them itself
@@ -34,6 +34,28 @@ var Arcade = {
 
   save: function (key, value) {
     try { localStorage.setItem(key, String(value)); } catch (e) { /* storage unavailable */ }
+  },
+
+  loadText: function (key, fallback) {
+    try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
+  },
+
+  /**
+   * Lays out a square board and its side panel for the board games: the panel goes to the right
+   * when the panel is wide and under the board when it is tall, whichever leaves the bigger board.
+   * Returns the board's size in CSS pixels.
+   */
+  fitSquare: function (wrap, board, side) {
+    var W = wrap.clientWidth - 20, H = wrap.clientHeight - 20, gap = 10;
+    var sideW = 190, sideH = Math.min(side.scrollHeight, 220);
+    var beside = Math.min(H, W - sideW - gap), below = Math.min(W, H - sideH - gap);
+    var mode = beside >= below ? 'beside' : 'below';
+    var size = Math.max(160, Math.floor(mode === 'beside' ? beside : below));
+    wrap.className = mode;
+    board.style.width = board.style.height = size + 'px';
+    side.style.width = mode === 'beside' ? sideW + 'px' : size + 'px';
+    side.style.height = mode === 'beside' ? size + 'px' : Math.max(80, H - size - gap) + 'px';
+    return size;
   }
 };
 
