@@ -9,6 +9,7 @@
     #wrap { display: flex; height: 100%; padding: 10px; box-sizing: border-box; gap: 10px; justify-content: center; outline: none; }
     #boardBox { position: relative; height: 100%; }
     #board { display: block; height: 100%; background: #161616; border: 1px solid #3a3a3a; border-radius: 4px; }
+    #left { display: flex; flex-direction: column; min-width: 84px; }
     #side { display: flex; flex-direction: column; gap: 8px; min-width: 84px; overflow: hidden; }
     .stats { display: flex; gap: 8px; }
     .stats > div { flex: 1; }
@@ -31,6 +32,9 @@
 </head>
 <body>
   <div id="wrap" tabindex="0">
+    <div id="left">
+      <div class="box"><div class="label">Hold</div><canvas id="hold" class="mini"></canvas></div>
+    </div>
     <div id="boardBox">
       <canvas id="board"></canvas>
       <div id="overlay">
@@ -40,7 +44,6 @@
       </div>
     </div>
     <div id="side">
-      <div class="box"><div class="label">Hold</div><canvas id="hold" class="mini"></canvas></div>
       <div class="box"><div class="label">Next</div><canvas id="next" class="mini"></canvas></div>
       <div class="box"><div class="label">Score</div><div class="value" id="score">0</div></div>
       <div class="box stats">

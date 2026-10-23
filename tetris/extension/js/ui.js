@@ -174,7 +174,7 @@ function drawCell(c, x, y, s, color, alpha) {
 
 function layout() {
   // Board keeps a 1:2 ratio inside whatever space the panel gives it.
-  var side = $('side').offsetWidth + 10;
+  var side = $('side').offsetWidth + $('left').offsetWidth + 20;
   var availH = wrap.clientHeight - 20, availW = wrap.clientWidth - 20 - side;
   var s = Math.max(8, Math.floor(Math.min(availH / 20, availW / 10)));
   boardCv.style.height = (s * 20 + 2) + 'px';

@@ -29,8 +29,8 @@
           <Type>Panel</Type>
           <Menu>AE Tetris</Menu>
           <Geometry>
-            <Size><Height>620</Height><Width>440</Width></Size>
-            <MinSize><Height>360</Height><Width>280</Width></MinSize>
+            <Size><Height>620</Height><Width>540</Width></Size>
+            <MinSize><Height>360</Height><Width>360</Width></MinSize>
           </Geometry>
         </UI>
       </DispatchInfo>
