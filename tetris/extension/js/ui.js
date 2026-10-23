@@ -172,15 +172,58 @@ function drawCell(c, x, y, s, color, alpha) {
   c.globalAlpha = 1;
 }
 
+var BASE = 24;                  // cell size (px) the boxes and fonts are designed around
+var laidOut = { w: 0, h: 0, s: BASE, u: 1, mode: 'cols' };
+
 function layout() {
-  // Board keeps a 1:2 ratio inside whatever space the panel gives it.
-  var side = $('side').offsetWidth + $('left').offsetWidth + 20;
-  var availH = wrap.clientHeight - 20, availW = wrap.clientWidth - 20 - side;
-  var s = Math.max(8, Math.floor(Math.min(availH / 20, availW / 10)));
-  boardCv.style.height = (s * 20 + 2) + 'px';
-  boardCv.style.width = (s * 10 + 2) + 'px';
-  $('boardBox').style.height = (s * 20 + 2) + 'px';
+  // The board keeps a 1:2 ratio and everything else scales with its cell size (--u = cell / 24).
+  // Wide panels put the boxes in columns beside the board; tall narrow ones move them above and
+  // below it. Whichever arrangement gives the bigger board wins.
+  var W = wrap.clientWidth - 20, H = wrap.clientHeight - 20;
+  if (W === laidOut.w && H === laidOut.h) return laidOut.s;
+  // Space the boxes take, in cells, at --u = s / 24: two 84px columns + gaps beside the board,
+  // or a ~70px row above and a ~52px row below it.
+  var sCols = Math.min(H / 20, W / (10 + (2 * 84 + 20) / BASE));
+  var sRows = Math.min(H / (20 + (70 + 52 + 16) / BASE), W / 10);
+  var mode = sRows > sCols * 1.05 ? 'rows' : 'cols';
+  var s = Math.floor(mode === 'rows' ? sRows : sCols);
+  var u = Math.min(2.5, Math.max(0.5, s / BASE));
+  document.documentElement.style.setProperty('--u', u.toFixed(3));
+  wrap.className = mode;
+  var keys = $('keys');
+  keys.className = 'clipped';   // fit without the key help; it comes back below if there is room
+  // Size the board, then shrink it if the boxes (rounded or clamped) still overflow.
+  laidOut = { w: -1, h: -1, s: s, u: u, mode: mode };
+  for (var i = 0; i < 12; i++) {
+    setBoard(s);
+    // Give the previews their real size before measuring (Next always shows 5 pieces).
+    drawMini(holdCv, []);
+    drawMini(nextCv, ['I', 'I', 'I', 'I', 'I']);
+    var r = extent(['holdBox', 'nextBox', 'scoreBox', 'statsBox', 'bestBox', 'boardBox']);
+    if (r.w <= W + 1 && r.h <= H + 1) break;
+    s = Math.max(8, s - Math.max(1, Math.ceil(s * 0.04)));
+  }
+  laidOut = { w: W, h: H, s: s, u: u, mode: mode };
+  keys.className = '';
+  var k = keys.getBoundingClientRect();
+  if (mode === 'cols' && (k.bottom > boardCv.getBoundingClientRect().bottom + 1 ||
+      k.top < $('bestBox').getBoundingClientRect().bottom)) keys.className = 'clipped';
   return s;
+}
+
+// Size of the box around the given elements (the grid is centred, so it can spill past either edge).
+function extent(ids) {
+  var l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+  ids.forEach(function (id) {
+    var e = $(id).getBoundingClientRect();
+    l = Math.min(l, e.left); t = Math.min(t, e.top); r = Math.max(r, e.right); b = Math.max(b, e.bottom);
+  });
+  return { w: r - l, h: b - t };
+}
+
+function setBoard(s) {
+  boardCv.style.width = (s * 10 + 2) + 'px';
+  boardCv.style.height = (s * 20 + 2) + 'px';
 }
 
 function draw() {
@@ -239,16 +282,23 @@ function draw() {
 }
 
 function drawMini(cv, types, dim) {
-  var w = 72, slot = 34, h = Math.max(1, types.length) * slot;
+  // Pieces stack downwards beside the board and run sideways when the boxes sit above it.
+  var u = laidOut.u, rows = laidOut.mode === 'rows', across = rows && types.length > 1;
+  var slot = 34 * u, n = Math.max(1, types.length);
+  var w = rows ? Math.min(cv.parentNode.clientWidth - 12 * u - 2, across ? Infinity : 72 * u) : 72 * u;
+  var h = across ? slot : n * slot;
+  var step = across ? w / n : w;
+  cv.style.width = w + 'px';
   cv.style.height = h + 'px';
   var c = fitCanvas(cv, w, h);
   c.clearRect(0, 0, w, h);
   types.forEach(function (t, i) {
-    var cells = Tetris.ROTATIONS[t][0], s = i === 0 ? 14 : 11;
+    var cells = Tetris.ROTATIONS[t][0], s = Math.min((i === 0 ? 14 : 11) * u, step / 4.4);
     var xs = cells.map(function (q) { return q[0]; }), ys = cells.map(function (q) { return q[1]; });
     var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
     var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-    var ox = (w - (maxX - minX + 1) * s) / 2, oy = i * slot + (slot - (maxY - minY + 1) * s) / 2;
+    var bx = across ? i * step : 0, by = across ? 0 : i * slot, bw = step;
+    var ox = bx + (bw - (maxX - minX + 1) * s) / 2, oy = by + (slot - (maxY - minY + 1) * s) / 2;
     cells.forEach(function (q) {
       drawCell(c, ox + (q[0] - minX) * s, oy + (q[1] - minY) * s, s, COLORS[t], dim ? 0.35 : 1);
     });
