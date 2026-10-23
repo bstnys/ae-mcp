@@ -19,20 +19,7 @@ var ctx = boardCv.getContext('2d');
 var game = null, state = 'idle';   // idle | playing | paused | over
 var held = {}, das = { dir: 0, t: 0, charged: false };
 var flash = null, popup = null, last = 0;
-var best = 0;
-try { best = parseInt(localStorage.getItem('aeTetrisBest'), 10) || 0; } catch (e) { /* storage unavailable */ }
-
-// Ask After Effects to send these keys to the panel instead of handling them itself
-// (otherwise Space would start a RAM preview and arrows would nudge layers).
-(function registerKeys() {
-  var cep = window.__adobe_cep__;
-  if (!cep || !cep.registerKeyEventsInterest) return;
-  var mac = [123, 124, 125, 126, 49, 6, 7, 8, 35, 15, 53, 36, 56, 60, 0, 2, 13, 1];   // arrows, space, Z X C P R, esc, return, shifts, A D W S
-  var win = [37, 38, 39, 40, 32, 90, 88, 67, 80, 82, 27, 13, 16, 65, 68, 87, 83];
-  var keys = (navigator.platform.indexOf('Mac') === 0 ? mac : win).map(function (k) { return { keyCode: k }; });
-  keys = keys.concat(keys.map(function (k) { return { keyCode: k.keyCode, shiftKey: true }; }));
-  cep.registerKeyEventsInterest(JSON.stringify(keys));
-})();
+var best = Arcade.load('aeTetrisBest');
 
 function keyAction(e) {
   switch (e.code) {
@@ -45,6 +32,7 @@ function keyAction(e) {
     case 'KeyC': case 'ShiftLeft': case 'ShiftRight': return 'hold';
     case 'KeyP': case 'Escape': return 'pause';
     case 'KeyR': return 'restart';
+    case 'KeyM': case 'Backspace': return 'menu';
     case 'Enter': case 'NumpadEnter': return 'start';
   }
   return null;
@@ -56,6 +44,7 @@ document.addEventListener('keydown', function (e) {
   e.preventDefault();
   if (a === 'start') { if (state !== 'playing') state === 'paused' ? resume() : start(); return; }
   if (a === 'restart') { start(); return; }
+  if (a === 'menu') { if (state !== 'playing') Arcade.menu(); return; }
   if (a === 'pause') { state === 'playing' ? pause() : state === 'paused' && resume(); return; }
   if (state !== 'playing' || e.repeat) return;
   held[a] = true;
@@ -86,6 +75,7 @@ window.addEventListener('blur', function () {
   if (state === 'playing') pause('패널 밖을 클릭해서 일시정지됐어요');
 });
 wrap.addEventListener('mousedown', function () { wrap.focus(); });
+$('menuBtn').addEventListener('click', Arcade.menu);
 $('startBtn').addEventListener('click', function () { wrap.focus(); state === 'paused' ? resume() : start(); });
 
 function start() {
@@ -119,7 +109,7 @@ function endGame() {
   var isBest = game.score > best;
   if (isBest) {
     best = game.score;
-    try { localStorage.setItem('aeTetrisBest', String(best)); } catch (e) { /* storage unavailable */ }
+    Arcade.save('aeTetrisBest', best);
   }
   showOverlay('GAME OVER', '점수 ' + game.score.toLocaleString() + (isBest ? '  🏆 최고 기록!' : '') +
     '<br>Enter 또는 R로 다시 시작', '다시 시작');

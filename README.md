@@ -43,9 +43,9 @@ cd ~/ae-mcp
 claude mcp add after-effects -- "$(command -v node)" ~/ae-mcp/server/src/index.js
 ```
 
-## AE Tetris
+## AE Arcade
 
-AE 안에서 하는 테트리스 패널도 있어요. `./tetris/install-mac.sh`로 설치하고 Window > Extensions > AE Tetris를 엽니다. 자세한 건 [tetris/README.md](tetris/README.md).
+AE 안에서 테트리스와 벽돌깨기를 골라 할 수 있는 게임 패널도 있어요. `./arcade/install-mac.sh`로 설치하고 Window > Extensions > AE Arcade를 엽니다. 자세한 건 [arcade/README.md](arcade/README.md).
 
 ## Claude Console (AE 안에서 바로 입력)
 

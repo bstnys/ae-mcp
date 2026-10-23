@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AE Breakout</title>
+  <style>
+    /* --u is the UI scale. breakout-ui.js sets it from the field size so the HUD grows with it. */
+    :root { --u: 1; }
+    html, body { margin: 0; height: 100%; background: #232323; color: #d6d6d6; overflow: hidden;
+      font: calc(12px * var(--u)) -apple-system, "Segoe UI", "Helvetica Neue", sans-serif; user-select: none; }
+    #wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;
+      padding: 10px; box-sizing: border-box; gap: calc(8px * var(--u)); outline: none; }
+    #hud { display: flex; gap: calc(8px * var(--u)); }
+    .box { flex: 1; background: #1b1b1b; border: 1px solid #333; border-radius: 4px; padding: calc(5px * var(--u)) calc(7px * var(--u)); min-width: 0; }
+    .label { font-size: calc(10px * var(--u)); letter-spacing: .08em; color: #8a8a8a; text-transform: uppercase; }
+    .value { font: 600 calc(16px * var(--u)) Menlo, Consolas, monospace; color: #eee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #fieldBox { position: relative; }
+    #field { display: block; background: #161616; border: 1px solid #3a3a3a; border-radius: 4px; cursor: none; }
+    #overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(18,18,18,.82); text-align: center; gap: calc(8px * var(--u)); border-radius: 4px; cursor: default; }
+    #overlay.hidden { display: none; }
+    #overlay h1 { margin: 0; font-size: calc(22px * var(--u)); color: #fff; letter-spacing: .06em; }
+    #overlay p { margin: 0; color: #aaa; line-height: 1.6; }
+    button { background: #2d8ceb; color: #fff; border: 0; border-radius: 5px; padding: calc(6px * var(--u)) calc(16px * var(--u));
+      font: inherit; font-weight: 600; cursor: pointer; }
+    button:hover { background: #3a97f0; }
+    button.ghost { background: transparent; color: #aaa; font-weight: 500; }
+    button.ghost:hover { color: #fff; background: rgba(255,255,255,.06); }
+    #keys { font-size: calc(10px * var(--u)); color: #777; text-align: center; }
+    #keys b { color: #aaa; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div id="wrap" tabindex="0">
+    <div id="hud">
+      <div class="box"><div class="label">Score</div><div class="value" id="score">0</div></div>
+      <div class="box"><div class="label">Stage</div><div class="value" id="stage">1</div></div>
+      <div class="box"><div class="label">Lives</div><div class="value" id="lives">3</div></div>
+      <div class="box"><div class="label">Best</div><div class="value" id="best">0</div></div>
+    </div>
+    <div id="fieldBox">
+      <canvas id="field"></canvas>
+      <div id="overlay">
+        <h1 id="ovTitle">AE BREAKOUT</h1>
+        <p id="ovText">마우스나 ← →로 패들을 움직이고<br>Space 또는 클릭으로 공을 쏘세요</p>
+        <button id="startBtn" type="button">시작</button>
+        <button id="menuBtn" class="ghost" type="button">게임 선택 (M)</button>
+      </div>
+    </div>
+    <div id="keys"><b>마우스 / ← →</b> 이동 · <b>Space / 클릭</b> 발사 · <b>P</b> 일시정지 · <b>R</b> 재시작 · <b>M</b> 게임 선택</div>
+  </div>
+  <script src="js/arcade.js"></script>
+  <script src="js/breakout.js"></script>
+  <script src="js/breakout-ui.js"></script>
+</body>
+</html>

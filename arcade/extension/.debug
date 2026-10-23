@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionList>
-  <Extension Id="com.aemcp.tetris.panel">
+  <Extension Id="com.aemcp.arcade.panel">
     <HostList>
       <Host Name="AEFT" Port="8090" />
     </HostList>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemcp.tetris" ExtensionBundleVersion="1.0.0"
-    ExtensionBundleName="AE Tetris" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.aemcp.arcade" ExtensionBundleVersion="1.1.0"
+    ExtensionBundleName="AE Arcade" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.aemcp.tetris.panel" Version="1.0.0" />
+    <Extension Id="com.aemcp.arcade.panel" Version="1.0.0" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -16,7 +16,7 @@
     </RequiredRuntimeList>
   </ExecutionEnvironment>
   <DispatchInfoList>
-    <Extension Id="com.aemcp.tetris.panel">
+    <Extension Id="com.aemcp.arcade.panel">
       <DispatchInfo>
         <Resources>
           <MainPath>./index.html</MainPath>
@@ -25,9 +25,9 @@
           <AutoVisible>true</AutoVisible>
         </Lifecycle>
         <UI>
-          <!-- Dockable panel: Window > Extensions > AE Tetris -->
+          <!-- Dockable panel: Window > Extensions > AE Arcade -->
           <Type>Panel</Type>
-          <Menu>AE Tetris</Menu>
+          <Menu>AE Arcade</Menu>
           <Geometry>
             <Size><Height>620</Height><Width>540</Width></Size>
             <MinSize><Height>360</Height><Width>360</Width></MinSize>

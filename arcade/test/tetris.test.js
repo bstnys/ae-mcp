@@ -1,4 +1,4 @@
-// Run: node --test tetris/test
+// Run: node --test arcade/test
 const test = require('node:test');
 const assert = require('node:assert');
 const { createGame, ROTATIONS, TYPES } = require('../extension/js/tetris.js');
