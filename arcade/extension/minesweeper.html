@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AE Minesweeper</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #232323; color: #d6d6d6; overflow: hidden;
+      font: 12px -apple-system, "Segoe UI", "Helvetica Neue", sans-serif; user-select: none; }
+    #wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;
+      padding: 10px; box-sizing: border-box; gap: 8px; outline: none; }
+    #top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .box { background: #1b1b1b; border: 1px solid #333; border-radius: 4px; padding: 3px 8px; font: 600 15px Menlo, Consolas, monospace; color: #eee; min-width: 52px; text-align: center; }
+    .box small { font: 10px -apple-system, "Segoe UI", sans-serif; color: #8a8a8a; margin-right: 4px; }
+    #face { font-size: 18px; line-height: 1; padding: 4px 8px; background: #2c2c2c; }
+    #face:hover { background: #383838; }
+    #board { display: block; border-radius: 4px; cursor: pointer; }
+    select { background: #2a2a2a; color: #ddd; border: 1px solid #444; border-radius: 4px; padding: 2px 4px; font: inherit; }
+    button { background: #2c2c2c; color: #bbb; border: 0; border-radius: 5px; padding: 5px 10px; font: inherit; cursor: pointer; }
+    button:hover { color: #fff; background: #383838; }
+    button.on { background: #e05252; color: #fff; }
+    #bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    #keys { font-size: 10px; color: #777; text-align: center; line-height: 1.6; }
+    #keys b { color: #aaa; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div id="wrap" tabindex="0">
+    <div id="top">
+      <select id="level"><option value="easy">초급 9×9</option><option value="normal">중급 16×16</option><option value="hard">고급 30×16</option></select>
+      <div class="box"><small>지뢰</small><span id="left">10</span></div>
+      <button id="face" type="button" title="새 게임 (N)">🙂</button>
+      <div class="box"><small>시간</small><span id="time">0</span></div>
+      <div class="box"><small>최고</small><span id="best">-</span></div>
+    </div>
+    <canvas id="board"></canvas>
+    <div id="bar">
+      <button id="flagBtn" type="button">🚩 깃발 모드 (F)</button>
+      <button id="menuBtn" type="button">← 게임 선택 (M)</button>
+    </div>
+    <div id="keys"><b>클릭</b> 열기 · <b>우클릭 / Option+클릭</b> 깃발 · 숫자 칸 <b>클릭</b> 주변 한 번에 열기</div>
+  </div>
+  <script src="js/arcade.js"></script>
+  <script src="js/minesweeper.js"></script>
+  <script src="js/minesweeper-ui.js"></script>
+</body>
+</html>

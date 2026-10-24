@@ -6,9 +6,11 @@
 'use strict';
 
 // Mac virtual key codes and Windows VK codes for the keys the games use: arrows, Space, Return, Esc,
-// Shifts, Backspace and the letters A C D M N P R S U W X Z plus 1-4.
-var MAC = [123, 124, 125, 126, 49, 36, 53, 56, 60, 51, 0, 8, 2, 46, 45, 35, 15, 1, 32, 13, 7, 6, 18, 19, 20, 21];
-var WIN = [37, 38, 39, 40, 32, 13, 27, 16, 8, 65, 67, 68, 77, 78, 80, 82, 83, 85, 87, 88, 90, 49, 50, 51, 52];
+// Shifts, Backspace, the letters A C D F M N P R S U W X Z, and 1-9 on the main row and the keypad.
+var MAC = [123, 124, 125, 126, 49, 36, 53, 56, 60, 51, 0, 8, 2, 3, 46, 45, 35, 15, 1, 32, 13, 7, 6,
+  18, 19, 20, 21, 23, 22, 26, 28, 25, 83, 84, 85, 86, 87, 88, 89, 91, 92, 76];
+var WIN = [37, 38, 39, 40, 32, 13, 27, 16, 8, 65, 67, 68, 70, 77, 78, 80, 82, 83, 85, 87, 88, 90,
+  49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100, 101, 102, 103, 104, 105];
 
 var Arcade = {
   // Ask After Effects to send these keys to the panel instead of handling them itself

@@ -6,11 +6,11 @@
   <style>
     html, body { margin: 0; height: 100%; background: #232323; color: #d6d6d6; overflow: hidden;
       font: 12px -apple-system, "Segoe UI", "Helvetica Neue", sans-serif; user-select: none; }
-    #wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;
-      padding: 16px; box-sizing: border-box; gap: 14px; outline: none; }
+    #wrap { display: flex; flex-direction: column; align-items: center; justify-content: safe center; height: 100%;
+      padding: 16px; box-sizing: border-box; gap: 14px; outline: none; overflow-y: auto; }
     h1 { margin: 0; font-size: 20px; letter-spacing: .14em; color: #fff; }
     #games { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
-    .game { flex: 1 1 130px; max-width: 200px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px;
+    .game { flex: 1 1 120px; max-width: 180px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px;
       padding: 12px; cursor: pointer; text-align: left; color: inherit; font: inherit; display: flex; flex-direction: column; gap: 8px; }
     .game:hover { background: #222; border-color: #555; }
     .game.sel { border-color: #2d8ceb; box-shadow: 0 0 0 1px #2d8ceb inset; }
@@ -46,8 +46,23 @@
         <span class="name">4 · 체스</span>
         <span class="meta"><span>AI 상대</span><b id="levelChess">보통</b></span>
       </button>
+      <button class="game" data-game="tictactoe" type="button">
+        <canvas id="pvTtt" width="240" height="180"></canvas>
+        <span class="name">5 · 틱택토</span>
+        <span class="meta"><span>AI 상대</span><b id="levelTtt">어려움</b></span>
+      </button>
+      <button class="game" data-game="2048" type="button">
+        <canvas id="pv2048" width="240" height="180"></canvas>
+        <span class="name">6 · 2048</span>
+        <span class="meta"><span>최고 점수</span><b id="best2048">0</b></span>
+      </button>
+      <button class="game" data-game="minesweeper" type="button">
+        <canvas id="pvMines" width="240" height="180"></canvas>
+        <span class="name">7 · 지뢰찾기</span>
+        <span class="meta"><span>초급 최고</span><b id="bestMines">-</b></span>
+      </button>
     </div>
-    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1~4</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
+    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1~7</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
   </div>
   <script src="js/arcade.js"></script>
   <script>
@@ -73,6 +88,9 @@
       else if (e.code === 'Digit2') Arcade.open('breakout');
       else if (e.code === 'Digit3') Arcade.open('gomoku');
       else if (e.code === 'Digit4') Arcade.open('chess');
+      else if (e.code === 'Digit5') Arcade.open('tictactoe');
+      else if (e.code === 'Digit6') Arcade.open('2048');
+      else if (e.code === 'Digit7') Arcade.open('minesweeper');
       else return;
       e.preventDefault();
     });
@@ -113,6 +131,48 @@
       o.fillStyle = s[2] === 1 ? '#151515' : '#f2f2f2';
       o.beginPath(); o.arc(40 + s[0] * 20, 10 + s[1] * 20, 8.5, 0, Math.PI * 2); o.fill();
     });
+
+    document.getElementById('levelTtt').textContent = LV[Arcade.loadText('aeTttLevel', 'hard')];
+    document.getElementById('best2048').textContent = Arcade.load('ae2048Best').toLocaleString();
+    var bm = Arcade.load('aeMinesBest_easy');
+    document.getElementById('bestMines').textContent = bm ? bm + '초' : '-';
+
+    var tt = document.getElementById('pvTtt').getContext('2d');
+    tt.strokeStyle = '#555'; tt.lineWidth = 4; tt.lineCap = 'round';
+    [[100, 20, 100, 160], [140, 20, 140, 160], [50, 67, 190, 67], [50, 113, 190, 113]].forEach(function (l) {
+      tt.beginPath(); tt.moveTo(l[0], l[1]); tt.lineTo(l[2], l[3]); tt.stroke();
+    });
+    tt.lineWidth = 7;
+    [[0, 0], [1, 1], [2, 2]].forEach(function (p) {
+      var cx = 75 + p[0] * 45, cy = 44 + p[1] * 46;
+      tt.strokeStyle = '#3fc6d9'; tt.beginPath(); tt.moveTo(cx - 12, cy - 12); tt.lineTo(cx + 12, cy + 12); tt.moveTo(cx + 12, cy - 12); tt.lineTo(cx - 12, cy + 12); tt.stroke();
+    });
+    [[2, 0], [0, 2]].forEach(function (p) {
+      tt.strokeStyle = '#e8933a'; tt.beginPath(); tt.arc(75 + p[0] * 45, 44 + p[1] * 46, 14, 0, Math.PI * 2); tt.stroke();
+    });
+
+    var t2 = document.getElementById('pv2048').getContext('2d');
+    var vals = [2, 4, 0, 0, 16, 8, 4, 0, 128, 64, 32, 2, 2048, 512, 256, 8];
+    var colsT = { 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 2048: '#edc22e' };
+    t2.fillStyle = '#3a342e'; t2.fillRect(46, 6, 168, 168);
+    vals.forEach(function (v, i) {
+      var x = 50 + (i % 4) * 41, y = 10 + Math.floor(i / 4) * 41;
+      t2.fillStyle = v ? colsT[v] : 'rgba(238,228,218,.12)'; t2.fillRect(x, y, 37, 37);
+      if (v) { t2.fillStyle = v < 8 ? '#3c3a32' : '#fff'; t2.font = '700 ' + (v > 999 ? 11 : v > 99 ? 13 : 16) + 'px sans-serif';
+        t2.textAlign = 'center'; t2.textBaseline = 'middle'; t2.fillText(v, x + 18.5, y + 19); }
+    });
+
+    var ms = document.getElementById('pvMines').getContext('2d');
+    var grid = ['##1.....1#', '##1.....1#', '221..1112#', '....1#####', '11..1#####', '#1..12####', '#1...1####', '#2...1####'];
+    var numC = ['', '#4a8fe0', '#4caf50', '#e05252'];
+    grid.forEach(function (row, r) {
+      row.split('').forEach(function (ch, c) {
+        var x = 30 + c * 18, y = 18 + r * 18;
+        ms.fillStyle = ch === '#' ? '#4a4a4a' : '#1b1b1b'; ms.fillRect(x, y, 17, 17);
+        if (/\d/.test(ch)) { ms.fillStyle = numC[+ch]; ms.font = '700 12px monospace'; ms.textAlign = 'center'; ms.textBaseline = 'middle'; ms.fillText(ch, x + 8.5, y + 9.5); }
+      });
+    });
+    ms.fillStyle = '#e05252'; ms.beginPath(); ms.moveTo(30 + 9 * 18 + 6, 18 + 2 * 18 + 3); ms.lineTo(30 + 9 * 18 + 14, 18 + 2 * 18 + 7); ms.lineTo(30 + 9 * 18 + 6, 18 + 2 * 18 + 11); ms.fill();
 
     var ch = document.getElementById('pvChess').getContext('2d');
     for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) {
