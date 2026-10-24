@@ -33,8 +33,11 @@ function updateStatus() {
       else if (r.who === me) { tally.me++; Arcade.save('aeTttWins', tally.me); }
       else { tally.ai++; Arcade.save('aeTttLosses', tally.ai); }
     }
-    if (r.who === 'draw') st.textContent = '무승부';
-    else { st.textContent = r.who === me ? '이겼어요!' : '졌어요'; st.className = 'status ' + (r.who === me ? 'win' : 'lose'); }
+    if (r.who === 'draw') st.textContent = '무승부 · 칸을 누르면 새 게임';
+    else {
+      st.textContent = (r.who === me ? '이겼어요!' : '졌어요') + ' · 칸을 누르면 새 게임';
+      st.className = 'status ' + (r.who === me ? 'win' : 'lose');
+    }
   } else if (thinking) { st.textContent = 'AI 차례…'; st.className = 'status think'; }
   else st.textContent = '내 차례 (' + me + ')';
   $('tally').textContent = '나 ' + tally.me + ' · AI ' + tally.ai + ' · 무승부 ' + tally.draw;
@@ -54,6 +57,7 @@ function aiTurn() {
 }
 
 function playAt(i) {
+  if (game.result) { newGame(); return; }   // after a finished game, any cell starts the next one
   if (thinking || game.result || game.turn !== me || !game.play(i)) return;
   render();
   if (!game.result) aiTurn();

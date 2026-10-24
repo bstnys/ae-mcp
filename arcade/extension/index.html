@@ -61,8 +61,13 @@
         <span class="name">7 · 지뢰찾기</span>
         <span class="meta"><span>초급 최고</span><b id="bestMines">-</b></span>
       </button>
+      <button class="game" data-game="snake" type="button">
+        <canvas id="pvSnake" width="240" height="180"></canvas>
+        <span class="name">8 · 스네이크</span>
+        <span class="meta"><span>최고 점수</span><b id="bestSnake">0</b></span>
+      </button>
     </div>
-    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1~7</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
+    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1~8</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
   </div>
   <script src="js/arcade.js"></script>
   <script>
@@ -91,6 +96,7 @@
       else if (e.code === 'Digit5') Arcade.open('tictactoe');
       else if (e.code === 'Digit6') Arcade.open('2048');
       else if (e.code === 'Digit7') Arcade.open('minesweeper');
+      else if (e.code === 'Digit8') Arcade.open('snake');
       else return;
       e.preventDefault();
     });
@@ -173,6 +179,15 @@
       });
     });
     ms.fillStyle = '#e05252'; ms.beginPath(); ms.moveTo(30 + 9 * 18 + 6, 18 + 2 * 18 + 3); ms.lineTo(30 + 9 * 18 + 14, 18 + 2 * 18 + 7); ms.lineTo(30 + 9 * 18 + 6, 18 + 2 * 18 + 11); ms.fill();
+
+    document.getElementById('bestSnake').textContent = Arcade.load('aeSnakeBest').toLocaleString();
+    var sn = document.getElementById('pvSnake').getContext('2d');
+    for (var sy = 0; sy < 10; sy++) for (var sx = 0; sx < 13; sx++) { sn.fillStyle = (sx + sy) % 2 ? '#191919' : '#1d1d1d'; sn.fillRect(3 + sx * 18, sy * 18, 18, 18); }
+    [[2, 6], [3, 6], [4, 6], [5, 6], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [8, 5]].forEach(function (p, i, a) {
+      sn.fillStyle = 'hsl(' + (130 - 20 * i / (a.length - 1)) + ',55%,' + (34 + 16 * i / (a.length - 1)) + '%)';
+      sn.fillRect(3 + p[0] * 18 + 2, p[1] * 18 + 2, 14, 14);
+    });
+    sn.fillStyle = '#e05252'; sn.beginPath(); sn.arc(3 + 8 * 18 + 9, 7 * 18 + 9, 6, 0, Math.PI * 2); sn.fill();
 
     var ch = document.getElementById('pvChess').getContext('2d');
     for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) {
