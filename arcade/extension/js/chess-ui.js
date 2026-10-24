@@ -22,6 +22,7 @@ $('color').value = me;
 $('level').value = level;
 
 function newGame() {
+  pending = null;
   game = Chess.createGame();
   selected = -1; targets = []; thinking = false; pendingPromo = null;
   promo.className = 'hidden';
@@ -60,18 +61,41 @@ function renderMoves() {
   box.scrollTop = box.scrollHeight;
 }
 
+// The AI thinks in a worker so the panel keeps responding. If workers aren't available
+// (some CEP setups refuse them for local files) it falls back to thinking on the page.
+var worker = null, jobId = 0, pending = null;
+try {
+  worker = new Worker('js/chess-worker.js');
+  worker.onmessage = function (e) { if (pending && e.data.id === pending.id) finishAi(pending.game, e.data.move); };
+  worker.onerror = function (e) {
+    e.preventDefault();
+    worker = null;
+    if (pending) { var p = pending; pending = null; thinkHere(p.game); }
+  };
+} catch (e) { worker = null; }
+
+function finishAi(g, m) {
+  pending = null;
+  if (g !== game) return;   // a new game started meanwhile
+  thinking = false;
+  if (m) game.play(game.moves(m.from).filter(function (x) { return x.to === m.to && x.promo === m.promo; })[0] || m);
+  render();
+}
+
+function thinkHere(g) {
+  // Let the panel paint "thinking" before the search blocks the page.
+  setTimeout(function () { if (g === game) finishAi(g, game.think(LEVELS[level])); }, 60);
+}
+
 function aiTurn() {
   thinking = true;
   updateStatus();
-  // Let the panel paint "thinking" before the search blocks the page.
-  var g = game;
-  setTimeout(function () {
-    if (g !== game) return;   // a new game started meanwhile
-    var m = game.think(LEVELS[level]);
-    thinking = false;
-    if (m) game.play(m);
-    render();
-  }, 60);
+  if (worker) {
+    pending = { id: ++jobId, game: game };
+    worker.postMessage({ id: jobId, pos: game.pos, opts: LEVELS[level] });
+  } else {
+    thinkHere(game);
+  }
 }
 
 function playMove(m) {

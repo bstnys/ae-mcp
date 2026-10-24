@@ -119,9 +119,13 @@ function handleEvents() {
   game.events.length = 0;
 }
 
+var drawnKey = '';
+
 function tick(now) {
   var dt = Math.min((now - (last || now)) / 1000, 0.05);
   last = now;
+  // Redraw only while something moves or the panel changed size, so an idle panel costs nothing.
+  var busy = state === 'playing' || popup || particles.length || shake > 0;
   if (state === 'playing') {
     game.update(dt, { left: keys.left, right: keys.right, pointerX: pointerX === null ? undefined : pointerX });
     handleEvents();
@@ -133,7 +137,8 @@ function tick(now) {
   });
   if (popup) { popup.t += dt; if (popup.t > 1.3) popup = null; }
   if (shake > 0) shake = Math.max(0, shake - dt);
-  draw();
+  var key = Arcade.sizeKey(wrap);
+  if (busy || key !== drawnKey) { draw(); drawnKey = key; }
   requestAnimationFrame(tick);
 }
 

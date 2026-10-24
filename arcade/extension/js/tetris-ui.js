@@ -115,9 +115,13 @@ function endGame() {
     '<br>Enter 또는 R로 다시 시작', '다시 시작');
 }
 
+var drawnKey = '';
+
 function tick(now) {
   var dt = Math.min((now - (last || now)) / 1000, 0.1);
   last = now;
+  // Redraw only while something moves or the panel changed size, so an idle panel costs nothing.
+  var busy = state === 'playing' || flash || popup;
   if (state === 'playing') {
     if (das.dir) {
       das.t += dt;
@@ -135,7 +139,8 @@ function tick(now) {
   }
   if (flash) { flash.t += dt; if (flash.t > 0.25) flash = null; }
   if (popup) { popup.t += dt; if (popup.t > 1.2) popup = null; }
-  draw();
+  var key = Arcade.sizeKey(wrap);
+  if (busy || key !== drawnKey) { draw(); drawnKey = key; }
   requestAnimationFrame(tick);
 }
 

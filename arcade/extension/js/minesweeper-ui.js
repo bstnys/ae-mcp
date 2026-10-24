@@ -21,6 +21,7 @@ function newGame() {
 }
 
 function update() {
+  dirty = true;
   $('left').textContent = game.mines - game.flags;
   $('time').textContent = game.elapsed();
   var b = Arcade.load(bestKey());
@@ -119,9 +120,12 @@ function draw() {
   });
 }
 
+var drawnKey = '', dirty = true;
 function tick() {
   if (game.state === 'playing') $('time').textContent = game.elapsed();
-  draw();
+  // Redraw only after a click or a resize.
+  var key = Arcade.sizeKey(wrap);
+  if (dirty || key !== drawnKey) { draw(); drawnKey = key; dirty = false; }
   requestAnimationFrame(tick);
 }
 

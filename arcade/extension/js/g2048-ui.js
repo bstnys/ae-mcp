@@ -20,6 +20,7 @@ function newGame() {
   game = Game2048.createGame();
   anim = { t: 0, moved: [], merged: [], spawned: game.cells.map(function (v, i) { return v ? i : -1; }).filter(function (i) { return i >= 0; }) };
   overlay.className = 'hidden';
+  dirty = true;
   update();
 }
 
@@ -70,7 +71,7 @@ window.addEventListener('mouseup', function (e) {
 });
 
 function undo() {
-  if (game.undo()) { anim = null; overlay.className = 'hidden'; update(); }
+  if (game.undo()) { anim = null; dirty = true; overlay.className = 'hidden'; update(); }
 }
 
 $('newBtn').addEventListener('click', newGame);
@@ -141,11 +142,13 @@ function draw(dt) {
   });
 }
 
-var last = 0;
+var last = 0, drawnKey = '', dirty = true;
 function tick(now) {
   var dt = Math.min((now - (last || now)) / 1000, 0.05);
   last = now;
-  draw(dt);
+  // Redraw only while tiles animate, after a change, or when the panel is resized.
+  var key = Arcade.sizeKey(wrap);
+  if (dirty || (anim && anim.t < SLIDE + POP + 0.05) || key !== drawnKey) { draw(dt); drawnKey = key; dirty = false; }
   requestAnimationFrame(tick);
 }
 

@@ -38,6 +38,9 @@ var Arcade = {
     try { localStorage.setItem(key, String(value)); } catch (e) { /* storage unavailable */ }
   },
 
+  /** Changes whenever the panel is resized, so idle pages know when they must redraw. */
+  sizeKey: function (el) { return el.clientWidth + 'x' + el.clientHeight + 'x' + (window.devicePixelRatio || 1); },
+
   loadText: function (key, fallback) {
     try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
   },
