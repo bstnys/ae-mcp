@@ -43,6 +43,10 @@ cd ~/ae-mcp
 claude mcp add after-effects -- "$(command -v node)" ~/ae-mcp/server/src/index.js
 ```
 
+## AE Arcade
+
+AE 안에서 테트리스, 벽돌깨기, 오목, 체스, 틱택토, 2048, 지뢰찾기, 스네이크를 골라 할 수 있는 게임 패널도 있어요(오목·체스·틱택토는 AI 상대). `./arcade/install-mac.sh`로 설치하고 Window > Extensions > AE Arcade를 엽니다. 자세한 건 [arcade/README.md](arcade/README.md).
+
 ## Claude Console (AE 안에서 바로 입력)
 
 FX Console처럼 단축키를 누르면 떠 있는 입력창이 열리고, 할 일을 적으면 Claude가 바로 AE를 조작합니다.

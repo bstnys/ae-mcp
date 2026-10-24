@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AE Gomoku</title>
+  <link rel="stylesheet" href="css/board.css">
+</head>
+<body>
+  <div id="wrap" tabindex="0">
+    <div id="boardBox">
+      <canvas id="board"></canvas>
+    </div>
+    <div id="side">
+      <div class="title">오목</div>
+      <div id="status" class="status">흑 차례</div>
+      <div class="row">
+        <label>난이도 <select id="level"><option value="easy">쉬움</option><option value="normal">보통</option><option value="hard">어려움</option></select></label>
+        <label>내 색 <select id="color"><option value="1">흑 (선)</option><option value="2">백</option></select></label>
+      </div>
+      <div class="row">
+        <button id="newBtn" type="button">새 게임 (N)</button>
+        <button id="undoBtn" class="ghost" type="button">무르기 (U)</button>
+      </div>
+      <div id="info" class="info">다섯 개 이상 이으면 이겨요 (자유룰).<br>흑이 먼저 둡니다.</div>
+      <div class="row foot"><button id="menuBtn" class="ghost" type="button">← 게임 선택 (M)</button></div>
+    </div>
+  </div>
+  <script src="js/arcade.js"></script>
+  <script src="js/gomoku.js"></script>
+  <script src="js/gomoku-ui.js"></script>
+</body>
+</html>

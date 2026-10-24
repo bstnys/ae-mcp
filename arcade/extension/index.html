@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>AE Arcade</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #232323; color: #d6d6d6; overflow: hidden;
+      font: 12px -apple-system, "Segoe UI", "Helvetica Neue", sans-serif; user-select: none; }
+    #wrap { display: flex; flex-direction: column; align-items: center; justify-content: safe center; height: 100%;
+      padding: 16px; box-sizing: border-box; gap: 14px; outline: none; overflow-y: auto; }
+    h1 { margin: 0; font-size: 20px; letter-spacing: .14em; color: #fff; }
+    #games { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
+    .game { flex: 1 1 120px; max-width: 180px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px;
+      padding: 12px; cursor: pointer; text-align: left; color: inherit; font: inherit; display: flex; flex-direction: column; gap: 8px; }
+    .game:hover { background: #222; border-color: #555; }
+    .game.sel { border-color: #2d8ceb; box-shadow: 0 0 0 1px #2d8ceb inset; }
+    .game canvas { width: 100%; aspect-ratio: 4 / 3; border-radius: 4px; background: #161616; display: block; }
+    .name { font-size: 15px; font-weight: 600; color: #fff; }
+    .meta { display: flex; justify-content: space-between; color: #8a8a8a; font-size: 11px; }
+    .meta b { color: #ddd; font: 600 12px Menlo, Consolas, monospace; }
+    #hint { color: #777; font-size: 11px; text-align: center; }
+    #hint b { color: #aaa; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div id="wrap" tabindex="0">
+    <h1>AE ARCADE</h1>
+    <div id="games">
+      <button class="game" data-game="tetris" type="button">
+        <canvas id="pvTetris" width="240" height="180"></canvas>
+        <span class="name">1 · 테트리스</span>
+        <span class="meta"><span>최고 점수</span><b id="bestTetris">0</b></span>
+      </button>
+      <button class="game" data-game="breakout" type="button">
+        <canvas id="pvBreakout" width="240" height="180"></canvas>
+        <span class="name">2 · 벽돌깨기</span>
+        <span class="meta"><span>최고 점수</span><b id="bestBreakout">0</b></span>
+      </button>
+      <button class="game" data-game="gomoku" type="button">
+        <canvas id="pvGomoku" width="240" height="180"></canvas>
+        <span class="name">3 · 오목</span>
+        <span class="meta"><span>AI 상대</span><b id="levelGomoku">보통</b></span>
+      </button>
+      <button class="game" data-game="chess" type="button">
+        <canvas id="pvChess" width="240" height="180"></canvas>
+        <span class="name">4 · 체스</span>
+        <span class="meta"><span>AI 상대</span><b id="levelChess">보통</b></span>
+      </button>
+      <button class="game" data-game="tictactoe" type="button">
+        <canvas id="pvTtt" width="240" height="180"></canvas>
+        <span class="name">5 · 틱택토</span>
+        <span class="meta"><span>AI 상대</span><b id="levelTtt">어려움</b></span>
+      </button>
+      <button class="game" data-game="2048" type="button">
+        <canvas id="pv2048" width="240" height="180"></canvas>
+        <span class="name">6 · 2048</span>
+        <span class="meta"><span>최고 점수</span><b id="best2048">0</b></span>
+      </button>
+      <button class="game" data-game="minesweeper" type="button">
+        <canvas id="pvMines" width="240" height="180"></canvas>
+        <span class="name">7 · 지뢰찾기</span>
+        <span class="meta"><span>초급 최고</span><b id="bestMines">-</b></span>
+      </button>
+      <button class="game" data-game="snake" type="button">
+        <canvas id="pvSnake" width="240" height="180"></canvas>
+        <span class="name">8 · 스네이크</span>
+        <span class="meta"><span>최고 점수</span><b id="bestSnake">0</b></span>
+      </button>
+    </div>
+    <div id="hint"><b>← →</b> 고르기 · <b>Enter</b> 시작 · <b>1~8</b> 바로 시작<br>게임 중에는 <b>M</b>으로 이 화면에 돌아와요</div>
+  </div>
+  <script src="js/arcade.js"></script>
+  <script>
+  (function () {
+    var cards = [].slice.call(document.querySelectorAll('.game'));
+    var last = 'tetris';
+    try { last = localStorage.getItem('aeArcadeLast') || 'tetris'; } catch (e) { /* storage unavailable */ }
+    var sel = Math.max(0, cards.findIndex(function (c) { return c.dataset.game === last; }));
+
+    function select(i) {
+      sel = (i + cards.length) % cards.length;
+      cards.forEach(function (c, j) { c.classList.toggle('sel', j === sel); });
+    }
+    cards.forEach(function (c, i) {
+      c.addEventListener('click', function () { Arcade.open(c.dataset.game); });
+      c.addEventListener('mouseenter', function () { select(i); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') select(sel - 1);
+      else if (e.code === 'ArrowRight' || e.code === 'ArrowDown') select(sel + 1);
+      else if (e.code === 'Enter' || e.code === 'Space') Arcade.open(cards[sel].dataset.game);
+      else if (e.code === 'Digit1') Arcade.open('tetris');
+      else if (e.code === 'Digit2') Arcade.open('breakout');
+      else if (e.code === 'Digit3') Arcade.open('gomoku');
+      else if (e.code === 'Digit4') Arcade.open('chess');
+      else if (e.code === 'Digit5') Arcade.open('tictactoe');
+      else if (e.code === 'Digit6') Arcade.open('2048');
+      else if (e.code === 'Digit7') Arcade.open('minesweeper');
+      else if (e.code === 'Digit8') Arcade.open('snake');
+      else return;
+      e.preventDefault();
+    });
+    select(sel);
+    document.getElementById('bestTetris').textContent = Arcade.load('aeTetrisBest').toLocaleString();
+    document.getElementById('bestBreakout').textContent = Arcade.load('aeBreakoutBest').toLocaleString();
+
+    // Little static previews of each game.
+    function cell(c, x, y, s, color) {
+      c.fillStyle = color; c.fillRect(x + 1, y + 1, s - 2, s - 2);
+      c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(x + 1, y + 1, s - 2, 3);
+    }
+    var t = document.getElementById('pvTetris').getContext('2d');
+    var rows = ['..........', '....TT....', '.....T....', '..........', '..........', 'Z........I', 'ZZ.LL....I', 'SZLLOO.JJI', 'SSIIIIOOJI', 'SJJTTTOOJL'];
+    var cols = { I: '#3fc6d9', J: '#4a6fe0', L: '#e8933a', O: '#e6c84a', S: '#5cc469', T: '#a35ad6', Z: '#e05252' };
+    rows.forEach(function (r, y) { r.split('').forEach(function (ch, x) { if (cols[ch]) cell(t, 30 + x * 18, y * 18, 18, cols[ch]); }); });
+    var b = document.getElementById('pvBreakout').getContext('2d');
+    var rc = ['#e05252', '#e8933a', '#e6c84a', '#5cc469', '#3fc6d9'];
+    for (var r = 0; r < 5; r++) for (var c = 0; c < 8; c++) {
+      if ((r === 3 && c === 2) || (r === 4 && (c === 2 || c === 3 || c === 6))) continue;
+      b.fillStyle = rc[r]; b.fillRect(12 + c * 27, 18 + r * 13, 24, 10);
+    }
+    b.fillStyle = '#ddd'; b.fillRect(100, 160, 50, 7);
+    b.fillStyle = '#fff'; b.beginPath(); b.arc(138, 120, 5, 0, Math.PI * 2); b.fill();
+
+    var LV = { easy: '쉬움', normal: '보통', hard: '어려움' };
+    document.getElementById('levelGomoku').textContent = LV[Arcade.loadText('aeGomokuLevel', 'normal')];
+    document.getElementById('levelChess').textContent = LV[Arcade.loadText('aeChessLevel', 'normal')];
+
+    var o = document.getElementById('pvGomoku').getContext('2d');
+    o.fillStyle = '#d4a85f'; o.fillRect(30, 0, 180, 180);
+    o.strokeStyle = 'rgba(60,40,15,.7)';
+    for (var i = 0; i < 9; i++) {
+      o.beginPath(); o.moveTo(40, 10 + i * 20 + .5); o.lineTo(200, 10 + i * 20 + .5); o.stroke();
+      o.beginPath(); o.moveTo(40 + i * 20 + .5, 10); o.lineTo(40 + i * 20 + .5, 170); o.stroke();
+    }
+    [[4, 4, 1], [3, 5, 2], [5, 3, 1], [3, 3, 2], [6, 2, 1], [4, 5, 2], [2, 6, 1], [5, 5, 2], [3, 4, 1]].forEach(function (s) {
+      o.fillStyle = s[2] === 1 ? '#151515' : '#f2f2f2';
+      o.beginPath(); o.arc(40 + s[0] * 20, 10 + s[1] * 20, 8.5, 0, Math.PI * 2); o.fill();
+    });
+
+    document.getElementById('levelTtt').textContent = LV[Arcade.loadText('aeTttLevel', 'hard')];
+    document.getElementById('best2048').textContent = Arcade.load('ae2048Best').toLocaleString();
+    var bm = Arcade.load('aeMinesBest_easy');
+    document.getElementById('bestMines').textContent = bm ? bm + '초' : '-';
+
+    var tt = document.getElementById('pvTtt').getContext('2d');
+    tt.strokeStyle = '#555'; tt.lineWidth = 4; tt.lineCap = 'round';
+    [[100, 20, 100, 160], [140, 20, 140, 160], [50, 67, 190, 67], [50, 113, 190, 113]].forEach(function (l) {
+      tt.beginPath(); tt.moveTo(l[0], l[1]); tt.lineTo(l[2], l[3]); tt.stroke();
+    });
+    tt.lineWidth = 7;
+    [[0, 0], [1, 1], [2, 2]].forEach(function (p) {
+      var cx = 75 + p[0] * 45, cy = 44 + p[1] * 46;
+      tt.strokeStyle = '#3fc6d9'; tt.beginPath(); tt.moveTo(cx - 12, cy - 12); tt.lineTo(cx + 12, cy + 12); tt.moveTo(cx + 12, cy - 12); tt.lineTo(cx - 12, cy + 12); tt.stroke();
+    });
+    [[2, 0], [0, 2]].forEach(function (p) {
+      tt.strokeStyle = '#e8933a'; tt.beginPath(); tt.arc(75 + p[0] * 45, 44 + p[1] * 46, 14, 0, Math.PI * 2); tt.stroke();
+    });
+
+    var t2 = document.getElementById('pv2048').getContext('2d');
+    var vals = [2, 4, 0, 0, 16, 8, 4, 0, 128, 64, 32, 2, 2048, 512, 256, 8];
+    var colsT = { 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 2048: '#edc22e' };
+    t2.fillStyle = '#3a342e'; t2.fillRect(46, 6, 168, 168);
+    vals.forEach(function (v, i) {
+      var x = 50 + (i % 4) * 41, y = 10 + Math.floor(i / 4) * 41;
+      t2.fillStyle = v ? colsT[v] : 'rgba(238,228,218,.12)'; t2.fillRect(x, y, 37, 37);
+      if (v) { t2.fillStyle = v < 8 ? '#3c3a32' : '#fff'; t2.font = '700 ' + (v > 999 ? 11 : v > 99 ? 13 : 16) + 'px sans-serif';
+        t2.textAlign = 'center'; t2.textBaseline = 'middle'; t2.fillText(v, x + 18.5, y + 19); }
+    });
+
+    var ms = document.getElementById('pvMines').getContext('2d');
+    var grid = ['##1.....1#', '##1.....1#', '221..1112#', '....1#####', '11..1#####', '#1..12####', '#1...1####', '#2...1####'];
+    var numC = ['', '#4a8fe0', '#4caf50', '#e05252'];
+    grid.forEach(function (row, r) {
+      row.split('').forEach(function (ch, c) {
+        var x = 30 + c * 18, y = 18 + r * 18;
+        ms.fillStyle = ch === '#' ? '#4a4a4a' : '#1b1b1b'; ms.fillRect(x, y, 17, 17);
+        if (/\d/.test(ch)) { ms.fillStyle = numC[+ch]; ms.font = '700 12px monospace'; ms.textAlign = 'center'; ms.textBaseline = 'middle'; ms.fillText(ch, x + 8.5, y + 9.5); }
+      });
+    });
+    ms.fillStyle = '#e05252'; ms.beginPath(); ms.moveTo(30 + 9 * 18 + 6, 18 + 2 * 18 + 3); ms.lineTo(30 + 9 * 18 + 14, 18 + 2 * 18 + 7); ms.lineTo(30 + 9 * 18 + 6, 18 + 2 * 18 + 11); ms.fill();
+
+    document.getElementById('bestSnake').textContent = Arcade.load('aeSnakeBest').toLocaleString();
+    var sn = document.getElementById('pvSnake').getContext('2d');
+    for (var sy = 0; sy < 10; sy++) for (var sx = 0; sx < 13; sx++) { sn.fillStyle = (sx + sy) % 2 ? '#191919' : '#1d1d1d'; sn.fillRect(3 + sx * 18, sy * 18, 18, 18); }
+    [[2, 6], [3, 6], [4, 6], [5, 6], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [8, 5]].forEach(function (p, i, a) {
+      sn.fillStyle = 'hsl(' + (130 - 20 * i / (a.length - 1)) + ',55%,' + (34 + 16 * i / (a.length - 1)) + '%)';
+      sn.fillRect(3 + p[0] * 18 + 2, p[1] * 18 + 2, 14, 14);
+    });
+    sn.fillStyle = '#e05252'; sn.beginPath(); sn.arc(3 + 8 * 18 + 9, 7 * 18 + 9, 6, 0, Math.PI * 2); sn.fill();
+
+    var ch = document.getElementById('pvChess').getContext('2d');
+    for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) {
+      ch.fillStyle = (x + y) % 2 ? '#7a8c9e' : '#d6dde4'; ch.fillRect(48 + x * 18, 18 + y * 18, 18, 18);
+    }
+    ch.font = '16px "Apple Symbols", "Segoe UI Symbol", serif'; ch.textAlign = 'center'; ch.textBaseline = 'middle';
+    [['♜', 0, 0, 0], ['♚', 6, 0, 0], ['♟', 5, 1, 0], ['♟', 6, 1, 0], ['♞', 2, 2, 0], ['♛', 3, 4, 1], ['♝', 2, 4, 1],
+     ['♟', 4, 4, 1], ['♟', 3, 6, 1], ['♚', 4, 7, 1], ['♜', 7, 7, 1]].forEach(function (p) {
+      ch.fillStyle = p[3] ? '#fafafa' : '#1d1d1d'; ch.strokeStyle = '#222';
+      ch.strokeText(p[0], 57 + p[1] * 18, 28 + p[2] * 18); ch.fillText(p[0], 57 + p[1] * 18, 28 + p[2] * 18);
+    });
+  })();
+  </script>
+</body>
+</html>
