@@ -64,6 +64,14 @@ claude   # 처음 실행 시 로그인
 
 **선택 설정:** `~/Library/Application Support/ae-mcp/console.json`에 `{"model": "sonnet"}`처럼 모델을, `claudePath`/`nodePath`로 실행 파일 경로를 지정할 수 있습니다.
 
+## 한글 타입라이터
+
+텍스트 레이어의 한글을 자모 단위로 조립하며 타이핑하는 ScriptUI 패널입니다(ㄱ → 가 → 각, 간 → 가나). 설치와 사용법은 [hangul-typewriter/README.md](hangul-typewriter/README.md)를 보세요.
+
+```bash
+./scripts/install-hangul-typewriter-mac.sh
+```
+
 ## 도구
 
 | 도구 | 하는 일 |
