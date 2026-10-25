@@ -32,49 +32,73 @@
     return out;
   }
 
-  function addControl(layer, def, overrides) {
+  // \uc774\ub984\uc73c\ub85c \ucc3e\uc9c0 \uc54a\uace0 \ud558\ub098\uc529 \ube44\uad50\ud55c\ub2e4 (property(name)\uc740 \ud2b9\uc218\ubb38\uc790\uac00 \ub4e0 \uc774\ub984\uc5d0\uc11c \ubbff\uc744 \uc218 \uc5c6\uc74c)
+  function findEffect(fx, name) {
+    for (var k = 1; k <= fx.numProperties; k++) if (fx.property(k).name == name) return fx.property(k);
+    return null;
+  }
+
+  function addEffect(layer, matchName, name) {
     var fx = layer.property("ADBE Effect Parade");
+    var idx = fx.addProperty(matchName).propertyIndex;
+    // \ud6a8\uacfc\ub97c \ub354\ud558\uba74 \uc774\uc804 \ucc38\uc870\uac00 \ubb34\ud6a8\uac00 \ub420 \uc218 \uc788\uc5b4 \ub9e4\ubc88 \ub2e4\uc2dc \uc7a1\ub294\ub2e4
+    var eff = layer.property("ADBE Effect Parade").property(idx);
+    eff.name = name;
+    return layer.property("ADBE Effect Parade").property(idx);
+  }
+
+  function addControl(layer, def, overrides) {
     var name = P + def[0];
-    var existing = fx.property(name);
-    if (existing) return;
+    if (findEffect(layer.property("ADBE Effect Parade"), name)) return;
     var kind = def[1], value = overrides.hasOwnProperty(def[0]) ? overrides[def[0]] : def[2];
     var eff = null;
     if (kind == "dropdown") {
       try {
-        eff = fx.addProperty(MATCH.dropdown);
-        eff.name = name;
+        eff = addEffect(layer, MATCH.dropdown, name);
         eff.property(1).setPropertyParameters(SHAPES);
-        eff = fx.property(name);
+        eff = findEffect(layer.property("ADBE Effect Parade"), name);
       } catch (e) {
+        eff = findEffect(layer.property("ADBE Effect Parade"), name);
         if (eff) try { eff.remove(); } catch (e2) {}
         eff = null;
         kind = "slider"; // \ub4dc\ub86d\ub2e4\uc6b4\uc774 \uc5c6\ub294 AE \ubc84\uc804: 1~4 \uc22b\uc790\ub85c
       }
     }
-    if (!eff) {
-      eff = fx.addProperty(MATCH[kind]);
-      eff.name = name;
-    }
+    if (!eff) eff = addEffect(layer, MATCH[kind], name);
     eff.property(1).setValue(value);
   }
+
+  function errText(e) { return (e && e.message ? e.message : String(e)) + (e && e.line ? " (line " + e.line + ")" : ""); }
 
   function apply(overrides) {
     var layers = textLayers();
     if (!layers) return alert("\ucef4\ud3ec\uc9c0\uc158\uc744 \uc5f4\uace0 \ud14d\uc2a4\ud2b8 \ub808\uc774\uc5b4\ub97c \uc120\ud0dd\ud558\uc138\uc694.");
     if (!layers.length) return alert("\ud14d\uc2a4\ud2b8 \ub808\uc774\uc5b4\ub97c \ud558\ub098 \uc774\uc0c1 \uc120\ud0dd\ud558\uc138\uc694.");
+    var problems = [];
     app.beginUndoGroup("\ud55c\uae00 \ud0c0\uc785\ub77c\uc774\ud130 \uc801\uc6a9");
     try {
       for (var i = 0; i < layers.length; i++) {
         var L = layers[i];
-        for (var c = 0; c < CONTROLS.length; c++) addControl(L, CONTROLS[c], overrides);
-        var st = L.property("ADBE Text Properties").property("ADBE Text Document");
-        st.expression = TAG + "\n" + EXPRESSION;
-        st.expressionEnabled = true;
-        if (st.expressionError) alert(L.name + ": " + st.expressionError);
+        // \ucee8\ud2b8\ub864 \ud558\ub098\uac00 \uc2e4\ud328\ud574\ub3c4 \uc775\uc2a4\ud504\ub808\uc158\uc740 \uae30\ubcf8\uac12\uc73c\ub85c \ub3d9\uc791\ud558\ubbc0\ub85c \uacc4\uc18d \uc9c4\ud589\ud55c\ub2e4
+        for (var c = 0; c < CONTROLS.length; c++) {
+          try { addControl(L, CONTROLS[c], overrides); }
+          catch (e) { problems.push(L.name + " / " + CONTROLS[c][0] + ": " + errText(e)); }
+        }
+        try {
+          var st = L.property("ADBE Text Properties").property("ADBE Text Document");
+          st.expression = TAG + "\n" + EXPRESSION;
+          st.expressionEnabled = true;
+          if (st.expressionError) problems.push(L.name + ": " + st.expressionError);
+        } catch (e) {
+          problems.push(L.name + " / \uc775\uc2a4\ud504\ub808\uc158: " + errText(e));
+        }
       }
+    } catch (e) {
+      problems.push(errText(e));
     } finally {
       app.endUndoGroup();
     }
+    if (problems.length) alert("\ud55c\uae00 \ud0c0\uc785\ub77c\uc774\ud130 \uc801\uc6a9 \uc911 \ubb38\uc81c\uac00 \uc788\uc5c8\uc5b4\uc694:\n\n" + problems.join("\n"));
   }
 
   function remove() {
@@ -88,7 +112,7 @@
         if (st.expression.indexOf(TAG) == 0) st.expression = "";
         var fx = L.property("ADBE Effect Parade");
         for (var k = fx.numProperties; k >= 1; k--) {
-          if (fx.property(k).name.indexOf(P) == 0) fx.property(k).remove();
+          if (fx.property(k).name.indexOf(P) == 0) { fx.property(k).remove(); fx = L.property("ADBE Effect Parade"); }
         }
       }
     } finally {
@@ -122,7 +146,7 @@
         }
         var fx = L.property("ADBE Effect Parade");
         for (var e = fx.numProperties; e >= 1; e--) {
-          if (fx.property(e).name.indexOf(P) == 0) fx.property(e).remove();
+          if (fx.property(e).name.indexOf(P) == 0) { fx.property(e).remove(); fx = L.property("ADBE Effect Parade"); }
         }
       }
     } finally {
@@ -158,16 +182,23 @@
       { multiline: true });
     help.preferredSize = [220, 60];
 
-    applyBtn.onClick = function () {
+    // ScriptUI panels swallow errors thrown in event handlers, so report them.
+    function guarded(fn) {
+      return function () {
+        try { fn(); } catch (e) { alert("\ud55c\uae00 \ud0c0\uc785\ub77c\uc774\ud130 \uc624\ub958: " + e.toString() + " (line " + e.line + ")"); }
+      };
+    }
+
+    applyBtn.onClick = guarded(function () {
       var v = parseFloat(speed.text);
       var o = {};
       if (!isNaN(v) && v > 0) o["\uc18d\ub3c4 (\ud0c0/\ucd08)"] = v;
       o["\ucee4\uc11c \ud45c\uc2dc"] = cursor.value ? 1 : 0;
       o["\ub3c4\uae68\ube44\ubd88"] = ghost.value ? 1 : 0;
       apply(o);
-    };
-    removeBtn.onClick = remove;
-    bakeBtn.onClick = bake;
+    });
+    removeBtn.onClick = guarded(remove);
+    bakeBtn.onClick = guarded(bake);
 
     w.onResizing = w.onResize = function () { this.layout.resize(); };
     if (w instanceof Window) { w.center(); w.show(); } else { w.layout.layout(true); }

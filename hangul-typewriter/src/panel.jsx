@@ -32,49 +32,73 @@
     return out;
   }
 
-  function addControl(layer, def, overrides) {
+  // 이름으로 찾지 않고 하나씩 비교한다 (property(name)은 특수문자가 든 이름에서 믿을 수 없음)
+  function findEffect(fx, name) {
+    for (var k = 1; k <= fx.numProperties; k++) if (fx.property(k).name == name) return fx.property(k);
+    return null;
+  }
+
+  function addEffect(layer, matchName, name) {
     var fx = layer.property("ADBE Effect Parade");
+    var idx = fx.addProperty(matchName).propertyIndex;
+    // 효과를 더하면 이전 참조가 무효가 될 수 있어 매번 다시 잡는다
+    var eff = layer.property("ADBE Effect Parade").property(idx);
+    eff.name = name;
+    return layer.property("ADBE Effect Parade").property(idx);
+  }
+
+  function addControl(layer, def, overrides) {
     var name = P + def[0];
-    var existing = fx.property(name);
-    if (existing) return;
+    if (findEffect(layer.property("ADBE Effect Parade"), name)) return;
     var kind = def[1], value = overrides.hasOwnProperty(def[0]) ? overrides[def[0]] : def[2];
     var eff = null;
     if (kind == "dropdown") {
       try {
-        eff = fx.addProperty(MATCH.dropdown);
-        eff.name = name;
+        eff = addEffect(layer, MATCH.dropdown, name);
         eff.property(1).setPropertyParameters(SHAPES);
-        eff = fx.property(name);
+        eff = findEffect(layer.property("ADBE Effect Parade"), name);
       } catch (e) {
+        eff = findEffect(layer.property("ADBE Effect Parade"), name);
         if (eff) try { eff.remove(); } catch (e2) {}
         eff = null;
         kind = "slider"; // 드롭다운이 없는 AE 버전: 1~4 숫자로
       }
     }
-    if (!eff) {
-      eff = fx.addProperty(MATCH[kind]);
-      eff.name = name;
-    }
+    if (!eff) eff = addEffect(layer, MATCH[kind], name);
     eff.property(1).setValue(value);
   }
+
+  function errText(e) { return (e && e.message ? e.message : String(e)) + (e && e.line ? " (line " + e.line + ")" : ""); }
 
   function apply(overrides) {
     var layers = textLayers();
     if (!layers) return alert("컴포지션을 열고 텍스트 레이어를 선택하세요.");
     if (!layers.length) return alert("텍스트 레이어를 하나 이상 선택하세요.");
+    var problems = [];
     app.beginUndoGroup("한글 타입라이터 적용");
     try {
       for (var i = 0; i < layers.length; i++) {
         var L = layers[i];
-        for (var c = 0; c < CONTROLS.length; c++) addControl(L, CONTROLS[c], overrides);
-        var st = L.property("ADBE Text Properties").property("ADBE Text Document");
-        st.expression = TAG + "\n" + EXPRESSION;
-        st.expressionEnabled = true;
-        if (st.expressionError) alert(L.name + ": " + st.expressionError);
+        // 컨트롤 하나가 실패해도 익스프레션은 기본값으로 동작하므로 계속 진행한다
+        for (var c = 0; c < CONTROLS.length; c++) {
+          try { addControl(L, CONTROLS[c], overrides); }
+          catch (e) { problems.push(L.name + " / " + CONTROLS[c][0] + ": " + errText(e)); }
+        }
+        try {
+          var st = L.property("ADBE Text Properties").property("ADBE Text Document");
+          st.expression = TAG + "\n" + EXPRESSION;
+          st.expressionEnabled = true;
+          if (st.expressionError) problems.push(L.name + ": " + st.expressionError);
+        } catch (e) {
+          problems.push(L.name + " / 익스프레션: " + errText(e));
+        }
       }
+    } catch (e) {
+      problems.push(errText(e));
     } finally {
       app.endUndoGroup();
     }
+    if (problems.length) alert("한글 타입라이터 적용 중 문제가 있었어요:\n\n" + problems.join("\n"));
   }
 
   function remove() {
@@ -88,7 +112,7 @@
         if (st.expression.indexOf(TAG) == 0) st.expression = "";
         var fx = L.property("ADBE Effect Parade");
         for (var k = fx.numProperties; k >= 1; k--) {
-          if (fx.property(k).name.indexOf(P) == 0) fx.property(k).remove();
+          if (fx.property(k).name.indexOf(P) == 0) { fx.property(k).remove(); fx = L.property("ADBE Effect Parade"); }
         }
       }
     } finally {
@@ -122,7 +146,7 @@
         }
         var fx = L.property("ADBE Effect Parade");
         for (var e = fx.numProperties; e >= 1; e--) {
-          if (fx.property(e).name.indexOf(P) == 0) fx.property(e).remove();
+          if (fx.property(e).name.indexOf(P) == 0) { fx.property(e).remove(); fx = L.property("ADBE Effect Parade"); }
         }
       }
     } finally {
@@ -158,16 +182,23 @@
       { multiline: true });
     help.preferredSize = [220, 60];
 
-    applyBtn.onClick = function () {
+    // ScriptUI panels swallow errors thrown in event handlers, so report them.
+    function guarded(fn) {
+      return function () {
+        try { fn(); } catch (e) { alert("한글 타입라이터 오류: " + e.toString() + " (line " + e.line + ")"); }
+      };
+    }
+
+    applyBtn.onClick = guarded(function () {
       var v = parseFloat(speed.text);
       var o = {};
       if (!isNaN(v) && v > 0) o["속도 (타/초)"] = v;
       o["커서 표시"] = cursor.value ? 1 : 0;
       o["도깨비불"] = ghost.value ? 1 : 0;
       apply(o);
-    };
-    removeBtn.onClick = remove;
-    bakeBtn.onClick = bake;
+    });
+    removeBtn.onClick = guarded(remove);
+    bakeBtn.onClick = guarded(bake);
 
     w.onResizing = w.onResize = function () { this.layout.resize(); };
     if (w instanceof Window) { w.center(); w.show(); } else { w.layout.layout(true); }
